@@ -1,0 +1,147 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  USER
+  REALTOR
+  DEVELOPER
+  ADMIN
+}
+
+enum DealType {
+  SALE
+  LONG_TERM_RENT
+  DAILY_RENT
+}
+
+enum PropertyCategory {
+  APARTMENT
+  HOUSE
+  ROOM
+  GARAGE
+}
+
+enum PropertyStatus {
+  AVAILABLE
+  RESERVED
+}
+
+enum ModerationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum BookingStatus {
+  ACTIVE
+  CANCELLED
+  EXPIRED
+}
+
+model User {
+  id               String   @id @default(cuid())
+  email            String   @unique
+  passwordHash     String?
+  googleId         String?  @unique
+  role             Role     @default(USER)
+  emailVerified    Boolean  @default(false)
+  isBlocked        Boolean  @default(false)
+  refreshTokenHash String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  properties Property[]
+  bookings   Booking[]
+  favorites  Favorite[]
+
+  @@map("users")
+}
+
+model District {
+  id   String @id @default(cuid())
+  name String @unique
+
+  properties Property[]
+
+  @@map("districts")
+}
+
+model Property {
+  id          String @id @default(cuid())
+  title       String
+  description String
+
+  category         PropertyCategory
+  dealType         DealType
+  status           PropertyStatus   @default(AVAILABLE)
+  moderationStatus ModerationStatus @default(PENDING)
+
+  price         Int?
+  pricePerNight Int?
+  minStayNights Int?
+
+  area      Float
+  address   String?
+  latitude  Float
+  longitude Float
+
+  photos String[]
+
+  viewsCount Int @default(0)
+
+  ownerId String
+  owner   User   @relation(fields: [ownerId], references: [id], onDelete: Restrict)
+
+  districtId String
+  district   District @relation(fields: [districtId], references: [id], onDelete: Restrict)
+
+  bookings  Booking[]
+  favorites Favorite[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([dealType, category, status])
+  @@index([districtId])
+  @@map("properties")
+}
+
+model Booking {
+  id              String        @id @default(cuid())
+  status          BookingStatus @default(ACTIVE)
+  autoCancelJobId String?
+
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([propertyId, status])
+  @@map("bookings")
+}
+
+model Favorite {
+  id String @id @default(cuid())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, propertyId])
+  @@map("favorites")
+}

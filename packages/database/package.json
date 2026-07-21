@@ -1,0 +1,27 @@
+{
+  "name": "@domly/database",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "postinstall": "prisma generate",
+    "db:generate": "prisma generate",
+    "db:format": "prisma format"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "dependencies": {
+    "@prisma/client": "6.19.3",
+    "dotenv": "^16.0.0"
+  },
+  "devDependencies": {
+    "prisma": "6.19.3",
+    "typescript": "5.9.2",
+    "@types/node": "^22.0.0"
+  }
+}
