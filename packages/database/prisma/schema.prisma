@@ -64,12 +64,25 @@ model User {
   @@map("users")
 }
 
-model District {
+model City {
   id   String @id @default(cuid())
   name String @unique
 
+  districts District[]
+
+  @@map("cities")
+}
+
+model District {
+  id     String @id @default(cuid())
+  name   String
+  cityId String
+  city   City   @relation(fields: [cityId], references: [id], onDelete: Restrict)
+
   properties Property[]
 
+  @@unique([cityId, name])
+  @@index([cityId])
   @@map("districts")
 }
 

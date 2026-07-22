@@ -39,3 +39,4 @@ yarn-error.log*
 
 .clinerules
 dev.note
+.vscode
