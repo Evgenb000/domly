@@ -46,22 +46,39 @@ enum BookingStatus {
 }
 
 model User {
-  id               String   @id @default(cuid())
-  email            String   @unique
-  passwordHash     String?
-  googleId         String?  @unique
-  role             Role     @default(USER)
-  emailVerified    Boolean  @default(false)
-  isBlocked        Boolean  @default(false)
-  refreshTokenHash String?
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  id                         String    @id @default(cuid())
+  email                      String    @unique
+  name                       String    @default("")
+  passwordHash               String?
+  googleId                   String?   @unique
+  role                       Role      @default(USER)
+  emailVerified              Boolean   @default(false)
+  emailVerificationToken     String?   @unique
+  emailVerificationExpiresAt DateTime?
+  isBlocked                  Boolean   @default(false)
+  createdAt                  DateTime  @default(now())
+  updatedAt                  DateTime  @updatedAt
 
-  properties Property[]
-  bookings   Booking[]
-  favorites  Favorite[]
+  properties    Property[]
+  bookings      Booking[]
+  favorites     Favorite[]
+  refreshTokens RefreshToken[]
 
   @@map("users")
+}
+
+model RefreshToken {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("refresh_tokens")
 }
 
 model City {
@@ -123,6 +140,8 @@ model Property {
 
   @@index([dealType, category, status])
   @@index([districtId])
+  @@index([ownerId])
+  @@index([moderationStatus])
   @@map("properties")
 }
 
@@ -141,6 +160,7 @@ model Booking {
   updatedAt DateTime @updatedAt
 
   @@index([propertyId, status])
+  @@index([userId])
   @@map("bookings")
 }
 
@@ -156,5 +176,6 @@ model Favorite {
   createdAt DateTime @default(now())
 
   @@unique([userId, propertyId])
+  @@index([propertyId])
   @@map("favorites")
 }
