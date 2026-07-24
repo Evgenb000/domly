@@ -15,6 +15,9 @@ import {
   loginSchema,
   registerSchema,
   verifyEmailQuerySchema,
+  type LoginDto,
+  type RegisterDto,
+  type VerifyEmailQuery,
 } from '@repo/shared';
 import { Request, Response } from 'express';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
@@ -32,8 +35,7 @@ export class AuthController {
 
   @Post('register')
   async register(
-    @Body(new ZodValidationPipe(registerSchema as any))
-    body: { email: string; password: string; name: string },
+    @Body(new ZodValidationPipe(registerSchema)) body: RegisterDto,
     @Res({ passthrough: true }) res: Response,
   ) {
     const result = await this.authService.register(body);
@@ -43,8 +45,7 @@ export class AuthController {
 
   @Post('login')
   async login(
-    @Body(new ZodValidationPipe(loginSchema as any))
-    body: { email: string; password: string },
+    @Body(new ZodValidationPipe(loginSchema)) body: LoginDto,
     @Res({ passthrough: true }) res: Response,
   ) {
     const result = await this.authService.login(body);
@@ -79,10 +80,8 @@ export class AuthController {
 
   @Get('verify-email')
   async verifyEmail(
-    @Query(new ZodValidationPipe(verifyEmailQuerySchema as any))
-    query: {
-      token: string;
-    },
+    @Query(new ZodValidationPipe(verifyEmailQuerySchema))
+    query: VerifyEmailQuery,
   ) {
     await this.authService.verifyEmail(query.token);
     return { message: 'Email verified successfully' };
