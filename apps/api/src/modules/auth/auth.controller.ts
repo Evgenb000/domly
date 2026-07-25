@@ -11,11 +11,15 @@ import {
   UseFilters,
   UseGuards,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { AuthGuard } from '@nestjs/passport';
 import {
   loginSchema,
+  oauthExchangeSchema,
   registerSchema,
   verifyEmailQuerySchema,
   type LoginDto,
+  type OauthExchangeDto,
   type RegisterDto,
   type VerifyEmailQuery,
 } from '@repo/shared';
@@ -26,12 +30,20 @@ import { CurrentUser } from './decorators/current-user.decorator';
 import { RefreshCookieClearFilter } from './filters/refresh-cookie-clear.filter';
 import { JwtAccessGuard } from './guards/jwt-access.guard';
 import { JwtRefreshGuard } from './guards/jwt-refresh.guard';
+import type { GoogleProfile } from './strategies/google.strategy';
 import type { JwtAccessPayload } from './strategies/jwt-access.strategy';
 import type { JwtRefreshPayload } from './strategies/jwt-refresh.strategy';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  private readonly frontendUrl: string;
+
+  constructor(
+    private readonly authService: AuthService,
+    configService: ConfigService,
+  ) {
+    this.frontendUrl = configService.getOrThrow<string>('FRONTEND_URL');
+  }
 
   @Post('register')
   async register(
@@ -93,6 +105,31 @@ export class AuthController {
   async resendVerification(@CurrentUser() payload: JwtAccessPayload) {
     await this.authService.resendVerification(payload.sub);
     return { message: 'Verification email sent' };
+  }
+
+  @Get('google')
+  @UseGuards(AuthGuard('google'))
+  googleRedirect() {}
+
+  @Get('google/callback')
+  @UseGuards(AuthGuard('google'))
+  async googleCallback(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const profile = req.user as GoogleProfile;
+    const { code } = await this.authService.handleGoogleCallback(profile);
+    res.redirect(`${this.frontendUrl}/auth/callback?code=${code}`);
+  }
+
+  @Post('oauth/exchange')
+  async oauthExchange(
+    @Body(new ZodValidationPipe(oauthExchangeSchema)) body: OauthExchangeDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const tokens = await this.authService.exchangeCodeForTokens(body.code);
+    this.setRefreshCookie(res, tokens.refreshToken);
+    return { accessToken: tokens.accessToken };
   }
 
   private setRefreshCookie(res: Response, refreshToken: string) {

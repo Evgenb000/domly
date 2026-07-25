@@ -12,6 +12,7 @@
     "check-types": "turbo run check-types"
   },
   "devDependencies": {
+    "@types/passport-google-oauth20": "^2.0.17",
     "prettier": "^3.7.4",
     "turbo": "^2.10.5",
     "typescript": "5.9.2"
@@ -35,6 +36,7 @@
     "@types/bcryptjs": "^2.4.6",
     "bcryptjs": "^3.0.3",
     "bullmq": "^5.81.0",
+    "passport-google-oauth20": "^2.0.0",
     "resend": "^6.18.0"
   }
 }

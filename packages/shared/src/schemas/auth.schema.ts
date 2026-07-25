@@ -28,3 +28,8 @@ export const verifyEmailQuerySchema = z.object({
   token: z.string().min(1),
 });
 export type VerifyEmailQuery = z.infer<typeof verifyEmailQuerySchema>;
+
+export const oauthExchangeSchema = z.object({
+  code: z.string().min(1),
+});
+export type OauthExchangeDto = z.infer<typeof oauthExchangeSchema>;

@@ -1,5 +1,7 @@
 import {
+  BadRequestException,
   ConflictException,
+  ForbiddenException,
   GoneException,
   Injectable,
   NotFoundException,
@@ -11,8 +13,10 @@ import { JwtService } from '@nestjs/jwt';
 import * as crypto from 'node:crypto';
 import { TWENTY_FOUR_HOURS_MS } from '../../common/constants/time.constants';
 import { compareValue, hashValue } from '../../common/utils/hash.util';
+import { RedisService } from '../../infrastructure/redis/redis.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { AuthRepository } from './auth.repository';
+import type { GoogleProfile } from './strategies/google.strategy';
 
 @Injectable()
 export class AuthService {
@@ -28,6 +32,7 @@ export class AuthService {
     private readonly configService: ConfigService,
     private readonly eventEmitter: EventEmitter2,
     private readonly notificationsService: NotificationsService,
+    private readonly redisService: RedisService,
   ) {
     this.accessSecret =
       this.configService.getOrThrow<string>('JWT_ACCESS_SECRET');
@@ -187,6 +192,67 @@ export class AuthService {
       name: user.name,
       verificationUrl,
     });
+  }
+
+  async validateOAuthLogin(profile: GoogleProfile) {
+    const existingByGoogleId = await this.authRepository.findByGoogleId(
+      profile.googleId,
+    );
+
+    if (existingByGoogleId) {
+      if (existingByGoogleId.isBlocked) {
+        throw new ForbiddenException('Account is blocked');
+      }
+      return existingByGoogleId;
+    }
+
+    const existingByEmail = await this.authRepository.findByEmail(
+      profile.email,
+    );
+
+    if (existingByEmail) {
+      if (existingByEmail.isBlocked) {
+        throw new ForbiddenException('Account is blocked');
+      }
+      await this.authRepository.linkGoogleAccount(
+        existingByEmail.id,
+        profile.googleId,
+      );
+      return existingByEmail;
+    }
+
+    const user = await this.authRepository.createOAuthUser({
+      email: profile.email,
+      googleId: profile.googleId,
+      name: profile.name,
+    });
+
+    return user;
+  }
+
+  async handleGoogleCallback(profile: GoogleProfile) {
+    const user = await this.validateOAuthLogin(profile);
+    const tokens = await this.issueTokens(user.id, user.role);
+
+    const code = crypto.randomBytes(32).toString('hex');
+    await this.redisService.set(
+      `oauth_exchange:${code}`,
+      JSON.stringify(tokens),
+      60,
+    );
+
+    return { code };
+  }
+
+  async exchangeCodeForTokens(code: string) {
+    const stored = await this.redisService.get(`oauth_exchange:${code}`);
+    if (!stored) {
+      throw new BadRequestException('Invalid or expired exchange code');
+    }
+
+    await this.redisService.del(`oauth_exchange:${code}`);
+
+    return JSON.parse(stored) as { accessToken: string; refreshToken: string };
   }
 
   private async issueTokens(userId: string, role: string) {
