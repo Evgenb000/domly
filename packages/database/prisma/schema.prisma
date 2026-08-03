@@ -34,7 +34,6 @@ enum PropertyStatus {
 }
 
 enum ModerationStatus {
-  PENDING
   APPROVED
   REJECTED
 }
@@ -111,11 +110,12 @@ model Property {
   category         PropertyCategory
   dealType         DealType
   status           PropertyStatus   @default(AVAILABLE)
-  moderationStatus ModerationStatus @default(PENDING)
+  moderationStatus ModerationStatus @default(APPROVED)
 
   price         Int?
   pricePerNight Int?
   minStayNights Int?
+  hasDeposit    Boolean?
 
   area      Float
   address   String?

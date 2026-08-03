@@ -115,9 +115,8 @@ const DEAL_TYPE_WEIGHTS: { value: DealType; weight: number }[] = [
 ];
 
 const MODERATION_WEIGHTS: { value: ModerationStatus; weight: number }[] = [
-  { value: "APPROVED", weight: 75 },
-  { value: "PENDING", weight: 18 },
-  { value: "REJECTED", weight: 7 },
+  { value: "APPROVED", weight: 90 },
+  { value: "REJECTED", weight: 10 },
 ];
 
 const ROLE_WEIGHTS: { value: Role; weight: number }[] = [
@@ -313,6 +312,7 @@ type PropertySeedRow = {
   price: number | null;
   pricePerNight: number | null;
   minStayNights: number | null;
+  hasDeposit: boolean | null;
   area: number;
   address: string;
   latitude: number;
@@ -350,6 +350,11 @@ async function seedProperties(
         minStayNights = faker.helpers.arrayElement([1, 2, 3]);
       }
 
+      const hasDeposit =
+        dealType === "LONG_TERM_RENT"
+          ? faker.datatype.boolean()
+          : null;
+
       propertiesData.push({
         id,
         title: titleFor(category, area, district.name),
@@ -361,6 +366,7 @@ async function seedProperties(
         price,
         pricePerNight,
         minStayNights,
+        hasDeposit,
         area,
         address: randomAddress(),
         latitude: jitterCoordinate(city.lat),
