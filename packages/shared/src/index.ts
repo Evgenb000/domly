@@ -7,4 +7,6 @@ export const propertyDealTypeSchema = z.enum([
 ]);
 export type PropertyDealType = z.infer<typeof propertyDealTypeSchema>;
 
+export * from "./schemas/property.schema";
+
 export * from "./schemas/auth.schema";
