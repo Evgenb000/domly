@@ -1,4 +1,14 @@
 import {
+  loginSchema,
+  oauthExchangeSchema,
+  registerSchema,
+  verifyEmailQuerySchema,
+  type LoginDto,
+  type OauthExchangeDto,
+  type RegisterDto,
+  type VerifyEmailQuery,
+} from '@domly/shared';
+import {
   Body,
   Controller,
   Get,
@@ -13,16 +23,6 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AuthGuard } from '@nestjs/passport';
-import {
-  loginSchema,
-  oauthExchangeSchema,
-  registerSchema,
-  verifyEmailQuerySchema,
-  type LoginDto,
-  type OauthExchangeDto,
-  type RegisterDto,
-  type VerifyEmailQuery,
-} from '@repo/shared';
 import { Request, Response } from 'express';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 import { AuthService } from './auth.service';
