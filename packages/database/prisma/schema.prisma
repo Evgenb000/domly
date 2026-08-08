@@ -117,10 +117,11 @@ model Property {
   minStayNights Int?
   hasDeposit    Boolean?
 
-  area      Float
-  address   String?
-  latitude  Float
-  longitude Float
+  area           Float
+  effectivePrice Int
+  address        String?
+  latitude       Float
+  longitude      Float
 
   photos String[]
 
@@ -142,6 +143,7 @@ model Property {
   @@index([districtId])
   @@index([ownerId])
   @@index([moderationStatus])
+  @@index([effectivePrice])
   @@map("properties")
 }
 

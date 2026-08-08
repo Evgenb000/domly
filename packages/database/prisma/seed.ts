@@ -1,15 +1,15 @@
-import { randomUUID } from "crypto";
+import { faker } from "@faker-js/faker";
 import {
-  PrismaClient,
-  Role,
+  BookingStatus,
   DealType,
+  ModerationStatus,
+  PrismaClient,
   PropertyCategory,
   PropertyStatus,
-  ModerationStatus,
-  BookingStatus,
+  Role,
 } from "@prisma/client";
-import { faker } from "@faker-js/faker";
 import bcrypt from "bcryptjs";
+import { randomUUID } from "crypto";
 
 const prisma = new PrismaClient();
 
@@ -314,6 +314,7 @@ type PropertySeedRow = {
   minStayNights: number | null;
   hasDeposit: boolean | null;
   area: number;
+  effectivePrice: number;
   address: string;
   latitude: number;
   longitude: number;
@@ -351,9 +352,10 @@ async function seedProperties(
       }
 
       const hasDeposit =
-        dealType === "LONG_TERM_RENT"
-          ? faker.datatype.boolean()
-          : null;
+        dealType === "LONG_TERM_RENT" ? faker.datatype.boolean() : null;
+
+      const effectivePrice =
+        dealType === "DAILY_RENT" ? pricePerNight! : price!;
 
       propertiesData.push({
         id,
@@ -368,6 +370,7 @@ async function seedProperties(
         minStayNights,
         hasDeposit,
         area,
+        effectivePrice,
         address: randomAddress(),
         latitude: jitterCoordinate(city.lat),
         longitude: jitterCoordinate(city.lng),
