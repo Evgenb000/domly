@@ -1,28 +1,32 @@
-import type { PropertyQueryDto } from '@domly/shared';
+import type { CreatePropertyDto, PropertyQueryDto } from '@domly/shared';
 import type { Property } from '@prisma/client';
+
+export interface PropertyCreateInput {
+  data: CreatePropertyDto;
+  ownerId: string;
+  effectivePrice: number;
+}
+
+export interface PropertyUpdateInput {
+  data: CreatePropertyDto;
+  effectivePrice: number;
+}
+
+export interface PaginatedProperties {
+  items: Property[];
+  total: number;
+}
 
 export const PROPERTIES_REPOSITORY = Symbol('PROPERTIES_REPOSITORY');
 
 export interface IPropertiesRepository {
-  findMany(
-    query: PropertyQueryDto,
-  ): Promise<{ items: Property[]; total: number }>;
+  findMany(query: PropertyQueryDto): Promise<PaginatedProperties>;
   findManyByOwner(
     ownerId: string,
     query: PropertyQueryDto,
-  ): Promise<{ items: Property[]; total: number }>;
+  ): Promise<PaginatedProperties>;
   findById(id: string): Promise<Property | null>;
-  create(data: {
-    data: any;
-    ownerId: string;
-    effectivePrice: number;
-  }): Promise<Property>;
-  update(
-    id: string,
-    data: {
-      data: any;
-      effectivePrice: number;
-    },
-  ): Promise<Property>;
+  create(input: PropertyCreateInput): Promise<Property>;
+  update(id: string, input: PropertyUpdateInput): Promise<Property>;
   delete(id: string): Promise<void>;
 }
