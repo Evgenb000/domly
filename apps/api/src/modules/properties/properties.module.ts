@@ -8,6 +8,7 @@ import {
 import { EffectivePricingService } from './pricing/effective-pricing.service';
 import { NightlyPriceStrategy } from './pricing/nightly-price.strategy';
 import { StandardPriceStrategy } from './pricing/standard-price.strategy';
+import { PropertiesController } from './properties.controller';
 import { PropertiesService } from './properties.service';
 import { PROPERTIES_REPOSITORY } from './repositories/properties-repository.interface';
 import { PropertiesRepository } from './repositories/properties.repository';
@@ -30,7 +31,7 @@ import { PropertiesRepository } from './repositories/properties.repository';
     PropertiesService,
     PropertyOwnershipGuard,
   ],
-  controllers: [],
+  controllers: [PropertiesController],
   exports: [PropertiesService],
 })
 export class PropertiesModule {}
