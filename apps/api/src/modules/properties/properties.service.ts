@@ -1,5 +1,10 @@
 import type { CreatePropertyDto, PropertyQueryDto } from '@domly/shared';
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import type { Property } from '@prisma/client';
 import { Prisma } from '@prisma/client';
 import { EffectivePricingService } from './pricing/effective-pricing.service';
@@ -76,6 +81,11 @@ export class PropertiesService {
   }
 
   async update(id: string, dto: CreatePropertyDto): Promise<Property> {
+    const existing = await this.propertiesRepository.findById(id);
+    if (existing && existing.dealType !== dto.dealType) {
+      throw new ConflictException('dealType cannot be changed after creation');
+    }
+
     const effectivePrice = this.effectivePricingService.calculate(dto);
     try {
       return await this.propertiesRepository.update(id, {
