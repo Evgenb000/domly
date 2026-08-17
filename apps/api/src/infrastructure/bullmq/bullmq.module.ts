@@ -13,6 +13,7 @@ import { ConfigService } from '@nestjs/config';
       }),
       inject: [ConfigService],
     }),
+    BullModule.registerQueue({ name: 'booking-auto-cancel' }),
   ],
   exports: [BullModule],
 })
