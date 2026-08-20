@@ -3,6 +3,7 @@ import type { Booking, Prisma } from '@prisma/client';
 import { PrismaService } from '../../../infrastructure/prisma/prisma.service';
 import type {
   BookingFilters,
+  BookingWithPropertyAndOwner,
   IBookingsRepository,
   PaginatedBookings,
 } from './bookings-repository.interface';
@@ -39,10 +40,10 @@ export class BookingsRepository implements IBookingsRepository {
     });
   }
 
-  async findById(id: string): Promise<Booking | null> {
+  async findById(id: string): Promise<BookingWithPropertyAndOwner | null> {
     return this.prisma.booking.findUnique({
       where: { id },
-      include: { property: true },
+      include: { property: { include: { owner: true } } },
     });
   }
 

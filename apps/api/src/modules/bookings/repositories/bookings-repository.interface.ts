@@ -1,6 +1,10 @@
-import type { Booking, BookingStatus } from '@prisma/client';
+import type { Booking, BookingStatus, Prisma } from '@prisma/client';
 
 export const BOOKINGS_REPOSITORY = Symbol('BOOKINGS_REPOSITORY');
+
+export type BookingWithPropertyAndOwner = Prisma.BookingGetPayload<{
+  include: { property: { include: { owner: true } } };
+}>;
 
 export interface BookingFilters {
   status?: BookingStatus;
@@ -16,7 +20,7 @@ export interface IBookingsRepository {
     propertyId: string,
     userId: string,
   ): Promise<Booking | null>;
-  findById(id: string): Promise<Booking | null>;
+  findById(id: string): Promise<BookingWithPropertyAndOwner | null>;
   findManyByUser(
     userId: string,
     filters: BookingFilters,
