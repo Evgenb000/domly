@@ -24,6 +24,20 @@ export class EmailFactory {
             </div>
           `,
         };
+      case 'BOOKING_CREATED':
+        return {
+          subject: 'Нова бронь — Domly',
+          html: `
+             <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto; padding: 24px;">
+               <h2>Вітаємо, ${payload.ownerName}!</h2>
+               <p>Ваш об'єкт «${payload.propertyTitle}» щойно забронювали.</p>
+               <p>Бронь утримує об'єкт протягом 24 годин. Якщо ви не домовитесь із покупцем/орендарем за цей час — бронь буде знято автоматично.</p>
+               <p style="color: #666; font-size: 12px;">
+                 ID броні: ${payload.bookingId}
+               </p>
+             </div>
+           `,
+        };
     }
   }
 }
