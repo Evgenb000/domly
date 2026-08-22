@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { BullMqInfrastructureModule } from '../../infrastructure/bullmq/bullmq.module';
 import { NotificationsModule } from '../notifications/notifications.module';
+import { BookingsController } from './bookings.controller';
 import { BookingsService } from './bookings.service';
 import { BookingCreatedListener } from './listeners/booking-created.listener';
 import { BookingAutoCancelProcessor } from './processors/booking-auto-cancel.processor';
@@ -9,6 +10,7 @@ import { BookingsRepository } from './repositories/bookings.repository';
 
 @Module({
   imports: [BullMqInfrastructureModule, NotificationsModule],
+  controllers: [BookingsController],
   providers: [
     BookingsService,
     BookingCreatedListener,

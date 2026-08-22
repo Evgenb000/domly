@@ -16,6 +16,11 @@ import {
   PaginatedBookings,
 } from './repositories/bookings-repository.interface';
 
+export interface CurrentUserPayload {
+  id: string;
+  role: string;
+}
+
 export interface BookingAutoCancelJobPayload {
   bookingId: string;
 }
