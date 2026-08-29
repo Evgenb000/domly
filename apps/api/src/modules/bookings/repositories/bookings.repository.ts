@@ -76,7 +76,7 @@ export class BookingsRepository implements IBookingsRepository {
   }
 
   async updateAutoCancelJobId(id: string, jobId: string): Promise<void> {
-    await this.prisma.booking.update({
+    await this.prisma.booking.updateMany({
       where: { id },
       data: { autoCancelJobId: jobId },
     });
