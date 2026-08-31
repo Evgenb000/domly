@@ -7,16 +7,12 @@ import {
 } from '@nestjs/common';
 import type { Property } from '@prisma/client';
 import { Prisma } from '@prisma/client';
+import type { CurrentUserPayload } from '../auth/types/current-user.type';
 import { EffectivePricingService } from './pricing/effective-pricing.service';
 import {
   IPropertiesRepository,
   PROPERTIES_REPOSITORY,
 } from './repositories/properties-repository.interface';
-
-export interface CurrentUserPayload {
-  id: string;
-  role: string;
-}
 
 export interface PaginatedResult<T> {
   items: T[];

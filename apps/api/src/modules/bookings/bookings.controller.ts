@@ -19,7 +19,7 @@ import {
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { JwtAccessGuard } from '../auth/guards/jwt-access.guard';
-import type { CurrentUserPayload } from './bookings.service';
+import type { CurrentUserPayload } from '../auth/types/current-user.type';
 import { BookingsService } from './bookings.service';
 import { BookingAccessGuard } from './guards/booking-access.guard';
 

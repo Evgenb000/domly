@@ -22,7 +22,7 @@ import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { JwtAccessGuard } from '../auth/guards/jwt-access.guard';
 import { PropertyOwnershipGuard } from './guards/property-ownership.guard';
-import type { CurrentUserPayload } from './properties.service';
+import type { CurrentUserPayload } from '../auth/types/current-user.type';
 import { PropertiesService } from './properties.service';
 
 @Controller('properties')
