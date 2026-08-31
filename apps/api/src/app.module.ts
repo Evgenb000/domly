@@ -7,6 +7,7 @@ import { BullMqInfrastructureModule } from './infrastructure/bullmq/bullmq.modul
 import { PrismaModule } from './infrastructure/prisma/prisma.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { BookingsModule } from './modules/bookings/bookings.module';
+import { FavoritesModule } from './modules/favorites/favorites.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { PropertiesModule } from './modules/properties/properties.module';
 
@@ -23,6 +24,7 @@ import { PropertiesModule } from './modules/properties/properties.module';
     AuthModule,
     PropertiesModule,
     BookingsModule,
+    FavoritesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
