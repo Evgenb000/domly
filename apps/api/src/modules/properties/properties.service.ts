@@ -3,11 +3,13 @@ import {
   ConflictException,
   Inject,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import type { Property } from '@prisma/client';
 import { Prisma } from '@prisma/client';
 import type { CurrentUserPayload } from '../auth/types/current-user.type';
+import { RedisService } from '../../infrastructure/redis/redis.service';
 import { EffectivePricingService } from './pricing/effective-pricing.service';
 import {
   IPropertiesRepository,
@@ -26,10 +28,13 @@ export interface PaginatedResult<T> {
 
 @Injectable()
 export class PropertiesService {
+  private readonly logger = new Logger(PropertiesService.name);
+
   constructor(
     @Inject(PROPERTIES_REPOSITORY)
     private readonly propertiesRepository: IPropertiesRepository,
     private readonly effectivePricingService: EffectivePricingService,
+    private readonly redisService: RedisService,
   ) {}
 
   async findMany(query: PropertyQueryDto): Promise<PaginatedResult<Property>> {
@@ -62,6 +67,24 @@ export class PropertiesService {
 
     if (property.moderationStatus === 'REJECTED' && !isOwner && !isAdmin) {
       throw new NotFoundException('Property not found');
+    }
+
+    const isOwnerOrAdmin = isOwner || isAdmin;
+
+    if (currentUser && !isOwnerOrAdmin) {
+      const dedupKey = `views:dedup:${id}:${currentUser.id}`;
+      try {
+        const isFirstView = await this.redisService.setNx(dedupKey, '1', 1800);
+
+        if (isFirstView) {
+          await this.propertiesRepository.incrementViews(id);
+        }
+      } catch (error) {
+        this.logger.error(
+          `Failed to increment views for property ${id}`,
+          error instanceof Error ? error.stack : undefined,
+        );
+      }
     }
 
     return property;

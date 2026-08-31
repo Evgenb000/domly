@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { PrismaModule } from '../../infrastructure/prisma/prisma.module';
+import { RedisInfrastructureModule } from '../../infrastructure/redis/redis.module';
 import { PropertyOwnershipGuard } from './guards/property-ownership.guard';
 import {
   EFFECTIVE_PRICE_STRATEGIES,
@@ -14,7 +15,7 @@ import { PROPERTIES_REPOSITORY } from './repositories/properties-repository.inte
 import { PropertiesRepository } from './repositories/properties.repository';
 
 @Module({
-  imports: [PrismaModule],
+  imports: [PrismaModule, RedisInfrastructureModule],
   providers: [
     { provide: PROPERTIES_REPOSITORY, useClass: PropertiesRepository },
     StandardPriceStrategy,

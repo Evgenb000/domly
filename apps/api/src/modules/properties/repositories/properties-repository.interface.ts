@@ -29,4 +29,5 @@ export interface IPropertiesRepository {
   create(input: PropertyCreateInput): Promise<Property>;
   update(id: string, input: PropertyUpdateInput): Promise<Property>;
   delete(id: string): Promise<void>;
+  incrementViews(id: string): Promise<void>;
 }

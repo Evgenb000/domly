@@ -54,6 +54,23 @@ export class PropertiesRepository implements IPropertiesRepository {
     await this.prisma.property.delete({ where: { id } });
   }
 
+  async incrementViews(id: string): Promise<void> {
+    try {
+      await this.prisma.property.update({
+        where: { id },
+        data: { viewsCount: { increment: 1 } },
+      });
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2025'
+      ) {
+        return;
+      }
+      throw error;
+    }
+  }
+
   private async paginate(
     where: Prisma.PropertyWhereInput,
     query: PropertyQueryDto,
