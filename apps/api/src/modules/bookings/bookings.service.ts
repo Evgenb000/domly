@@ -9,7 +9,6 @@ import {
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import type { Booking } from '@prisma/client';
 import type { Queue } from 'bullmq';
-import type { CurrentUserPayload } from '../auth/types/current-user.type';
 import {
   BOOKINGS_REPOSITORY,
   BookingFilters,

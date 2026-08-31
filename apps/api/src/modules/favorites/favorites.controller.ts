@@ -1,7 +1,4 @@
-import {
-  CreateFavoriteSchema,
-  type CreateFavoriteDto,
-} from '@domly/shared';
+import { CreateFavoriteSchema, type CreateFavoriteDto } from '@domly/shared';
 import {
   Controller,
   Body,
