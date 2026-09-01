@@ -3,6 +3,7 @@ import {
   ConflictException,
   ForbiddenException,
   GoneException,
+  Inject,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -17,6 +18,10 @@ import { RedisService } from '../../infrastructure/redis/redis.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { AuthRepository } from './auth.repository';
 import type { GoogleProfile } from './strategies/google.strategy';
+import {
+  IUsersRepository,
+  USERS_REPOSITORY,
+} from '../users/repositories/users-repository.interface';
 
 @Injectable()
 export class AuthService {
@@ -28,6 +33,8 @@ export class AuthService {
 
   constructor(
     private readonly authRepository: AuthRepository,
+    @Inject(USERS_REPOSITORY)
+    private readonly usersRepository: IUsersRepository,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
     private readonly eventEmitter: EventEmitter2,
@@ -46,13 +53,13 @@ export class AuthService {
   }
 
   async register(dto: { email: string; password: string; name: string }) {
-    const existing = await this.authRepository.findByEmail(dto.email);
+    const existing = await this.usersRepository.findByEmail(dto.email);
     if (existing) {
       throw new ConflictException('User with this email already exists');
     }
 
     const passwordHash = await hashValue(dto.password);
-    const user = await this.authRepository.createUser({
+    const user = await this.usersRepository.createUser({
       email: dto.email,
       name: dto.name,
       passwordHash,
@@ -78,7 +85,7 @@ export class AuthService {
   }
 
   async login(dto: { email: string; password: string }) {
-    const user = await this.authRepository.findByEmail(dto.email);
+    const user = await this.usersRepository.findByEmail(dto.email);
     if (!user || !user.passwordHash) {
       throw new UnauthorizedException('Invalid email or password');
     }
@@ -122,7 +129,7 @@ export class AuthService {
       throw new UnauthorizedException('Token compromised');
     }
 
-    const user = await this.authRepository.findById(payload.sub);
+    const user = await this.usersRepository.findById(payload.sub);
     if (!user || user.isBlocked) {
       throw new UnauthorizedException();
     }
@@ -166,7 +173,7 @@ export class AuthService {
   }
 
   async resendVerification(userId: string): Promise<void> {
-    const user = await this.authRepository.findById(userId);
+    const user = await this.usersRepository.findById(userId);
     if (!user) {
       throw new NotFoundException('User not found');
     }
@@ -195,7 +202,7 @@ export class AuthService {
   }
 
   async validateOAuthLogin(profile: GoogleProfile) {
-    const existingByGoogleId = await this.authRepository.findByGoogleId(
+    const existingByGoogleId = await this.usersRepository.findByGoogleId(
       profile.googleId,
     );
 
@@ -206,7 +213,7 @@ export class AuthService {
       return existingByGoogleId;
     }
 
-    const existingByEmail = await this.authRepository.findByEmail(
+    const existingByEmail = await this.usersRepository.findByEmail(
       profile.email,
     );
 
@@ -214,14 +221,14 @@ export class AuthService {
       if (existingByEmail.isBlocked) {
         throw new ForbiddenException('Account is blocked');
       }
-      await this.authRepository.linkGoogleAccount(
+      await this.usersRepository.linkGoogleAccount(
         existingByEmail.id,
         profile.googleId,
       );
       return existingByEmail;
     }
 
-    const user = await this.authRepository.createOAuthUser({
+    const user = await this.usersRepository.createOAuthUser({
       email: profile.email,
       googleId: profile.googleId,
       name: profile.name,

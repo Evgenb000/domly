@@ -1,8 +1,11 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import { AuthRepository } from '../auth.repository';
+import {
+  IUsersRepository,
+  USERS_REPOSITORY,
+} from '../../users/repositories/users-repository.interface';
 
 export interface JwtAccessPayload {
   sub: string;
@@ -16,7 +19,8 @@ export class JwtAccessStrategy extends PassportStrategy(
 ) {
   constructor(
     configService: ConfigService,
-    private readonly authRepository: AuthRepository,
+    @Inject(USERS_REPOSITORY)
+    private readonly usersRepository: IUsersRepository,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -27,7 +31,7 @@ export class JwtAccessStrategy extends PassportStrategy(
   async validate(
     payload: JwtAccessPayload,
   ): Promise<{ id: string; email: string; role: string }> {
-    const user = await this.authRepository.findById(payload.sub);
+    const user = await this.usersRepository.findById(payload.sub);
     if (!user || user.isBlocked) {
       throw new UnauthorizedException();
     }

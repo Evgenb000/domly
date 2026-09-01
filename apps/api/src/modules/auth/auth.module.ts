@@ -9,12 +9,14 @@ import { UserRegisteredListener } from './listeners/user-registered.listener';
 import { GoogleStrategy } from './strategies/google.strategy';
 import { JwtAccessStrategy } from './strategies/jwt-access.strategy';
 import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
+import { UsersModule } from '../users/users.module';
 
 @Module({
   imports: [
     JwtModule.register({}),
     NotificationsModule,
     RedisInfrastructureModule,
+    UsersModule,
   ],
   controllers: [AuthController],
   providers: [
