@@ -10,6 +10,7 @@ import { BookingsModule } from './modules/bookings/bookings.module';
 import { FavoritesModule } from './modules/favorites/favorites.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { PropertiesModule } from './modules/properties/properties.module';
+import { AdminModule } from './modules/admin/admin.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { PropertiesModule } from './modules/properties/properties.module';
     PropertiesModule,
     BookingsModule,
     FavoritesModule,
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [AppService],
