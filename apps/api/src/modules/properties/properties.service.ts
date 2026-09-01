@@ -1,4 +1,8 @@
-import type { CreatePropertyDto, PropertyQueryDto } from '@domly/shared';
+import type {
+  AdminPropertyQueryDto,
+  CreatePropertyDto,
+  PropertyQueryDto,
+} from '@domly/shared';
 import {
   ConflictException,
   Inject,
@@ -50,6 +54,14 @@ export class PropertiesService {
       ownerId,
       query,
     );
+    return this.paginate(items, total, query);
+  }
+
+  async findManyForAdmin(
+    query: AdminPropertyQueryDto,
+  ): Promise<PaginatedResult<Property>> {
+    const { items, total } =
+      await this.propertiesRepository.findManyForAdmin(query);
     return this.paginate(items, total, query);
   }
 
@@ -125,6 +137,26 @@ export class PropertiesService {
   async remove(id: string): Promise<void> {
     try {
       await this.propertiesRepository.delete(id);
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2025'
+      ) {
+        throw new NotFoundException('Property not found');
+      }
+      throw error;
+    }
+  }
+
+  async updateModerationStatus(
+    id: string,
+    moderationStatus: 'APPROVED' | 'REJECTED',
+  ): Promise<Property> {
+    try {
+      return await this.propertiesRepository.updateModerationStatus(
+        id,
+        moderationStatus,
+      );
     } catch (error) {
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&

@@ -1,4 +1,4 @@
-import type { PropertyQueryDto } from '@domly/shared';
+import type { AdminPropertyQueryDto, PropertyQueryDto } from '@domly/shared';
 import { Injectable } from '@nestjs/common';
 import { Prisma, Property } from '@prisma/client';
 import { PrismaService } from '../../../infrastructure/prisma/prisma.service';
@@ -23,6 +23,13 @@ export class PropertiesRepository implements IPropertiesRepository {
     query: PropertyQueryDto,
   ): Promise<PaginatedProperties> {
     const where = this.buildWhere(query, { ownerId });
+    return this.paginate(where, query);
+  }
+
+  async findManyForAdmin(
+    query: AdminPropertyQueryDto,
+  ): Promise<PaginatedProperties> {
+    const where = this.buildWhere(query, {});
     return this.paginate(where, query);
   }
 
@@ -71,6 +78,16 @@ export class PropertiesRepository implements IPropertiesRepository {
     }
   }
 
+  async updateModerationStatus(
+    id: string,
+    moderationStatus: 'APPROVED' | 'REJECTED',
+  ): Promise<Property> {
+    return this.prisma.property.update({
+      where: { id },
+      data: { moderationStatus },
+    });
+  }
+
   private async paginate(
     where: Prisma.PropertyWhereInput,
     query: PropertyQueryDto,
@@ -92,7 +109,7 @@ export class PropertiesRepository implements IPropertiesRepository {
   }
 
   private buildWhere(
-    query: PropertyQueryDto,
+    query: AdminPropertyQueryDto,
     extra: Prisma.PropertyWhereInput,
   ): Prisma.PropertyWhereInput {
     const where: Prisma.PropertyWhereInput = { ...extra };
@@ -100,6 +117,7 @@ export class PropertiesRepository implements IPropertiesRepository {
     if (query.dealType) where.dealType = query.dealType;
     if (query.category) where.category = query.category;
     if (query.districtId) where.districtId = query.districtId;
+    if (query.moderationStatus) where.moderationStatus = query.moderationStatus;
 
     if (query.priceMin !== undefined || query.priceMax !== undefined) {
       where.effectivePrice = {

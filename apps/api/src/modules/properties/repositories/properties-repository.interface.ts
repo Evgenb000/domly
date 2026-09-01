@@ -1,4 +1,8 @@
-import type { CreatePropertyDto, PropertyQueryDto } from '@domly/shared';
+import type {
+  AdminPropertyQueryDto,
+  CreatePropertyDto,
+  PropertyQueryDto,
+} from '@domly/shared';
 import type { Property } from '@prisma/client';
 
 export interface PropertyCreateInput {
@@ -25,9 +29,14 @@ export interface IPropertiesRepository {
     ownerId: string,
     query: PropertyQueryDto,
   ): Promise<PaginatedProperties>;
+  findManyForAdmin(query: AdminPropertyQueryDto): Promise<PaginatedProperties>;
   findById(id: string): Promise<Property | null>;
   create(input: PropertyCreateInput): Promise<Property>;
   update(id: string, input: PropertyUpdateInput): Promise<Property>;
   delete(id: string): Promise<void>;
   incrementViews(id: string): Promise<void>;
+  updateModerationStatus(
+    id: string,
+    moderationStatus: 'APPROVED' | 'REJECTED',
+  ): Promise<Property>;
 }

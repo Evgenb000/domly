@@ -50,24 +50,45 @@ export const UpdatePropertySchema = CreatePropertySchema;
 
 export type CreatePropertyDto = z.infer<typeof CreatePropertySchema>;
 
-export const PropertyQuerySchema = z
-  .object({
-    dealType: DealTypeEnum.optional(),
-    category: PropertyCategoryEnum.optional(),
-    districtId: z.string().cuid().optional(),
-    priceMin: z.coerce.number().int().nonnegative().optional(),
-    priceMax: z.coerce.number().int().positive().optional(),
-    areaMin: z.coerce.number().positive().optional(),
-    areaMax: z.coerce.number().positive().optional(),
-    sortBy: z.enum(["price", "createdAt"]).default("createdAt"),
-    sortOrder: z.enum(["asc", "desc"]).default("desc"),
-    page: z.coerce.number().int().positive().default(1),
-    limit: z.coerce.number().int().positive().max(50).default(20),
-  })
-  .refine(
-    (data) =>
-      !data.priceMin || !data.priceMax || data.priceMin <= data.priceMax,
-    { message: "priceMin must be <= priceMax", path: ["priceMin"] },
-  );
+const propertyQueryBaseSchema = z.object({
+  dealType: DealTypeEnum.optional(),
+  category: PropertyCategoryEnum.optional(),
+  districtId: z.string().cuid().optional(),
+  priceMin: z.coerce.number().int().nonnegative().optional(),
+  priceMax: z.coerce.number().int().positive().optional(),
+  areaMin: z.coerce.number().positive().optional(),
+  areaMax: z.coerce.number().positive().optional(),
+  sortBy: z.enum(["price", "createdAt"]).default("createdAt"),
+  sortOrder: z.enum(["asc", "desc"]).default("desc"),
+  page: z.coerce.number().int().positive().default(1),
+  limit: z.coerce.number().int().positive().max(50).default(20),
+});
+
+const validatePriceRange = (
+  data: { priceMin?: number; priceMax?: number },
+) => !data.priceMin || !data.priceMax || data.priceMin <= data.priceMax;
+
+const priceRangeIssue = {
+  message: "priceMin must be <= priceMax",
+  path: ["priceMin"],
+};
+
+export const PropertyQuerySchema = propertyQueryBaseSchema.refine(
+  validatePriceRange,
+  priceRangeIssue,
+);
 
 export type PropertyQueryDto = z.infer<typeof PropertyQuerySchema>;
+
+export const UpdateModerationStatusSchema = z.object({
+  moderationStatus: z.enum(["APPROVED", "REJECTED"]),
+});
+export type UpdateModerationStatusDto = z.infer<typeof UpdateModerationStatusSchema>;
+
+export const AdminPropertyQuerySchema = propertyQueryBaseSchema
+  .extend({
+    moderationStatus: z.enum(["APPROVED", "REJECTED"]).optional(),
+  })
+  .refine(validatePriceRange, priceRangeIssue);
+
+export type AdminPropertyQueryDto = z.infer<typeof AdminPropertyQuerySchema>;
