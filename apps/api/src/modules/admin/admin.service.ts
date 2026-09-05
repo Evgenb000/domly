@@ -12,6 +12,8 @@ import {
 } from '../users/repositories/users-repository.interface';
 import { RedisService } from '../../infrastructure/redis/redis.service';
 import { PropertiesService } from '../properties/properties.service';
+import { toPropertyResponse } from '../properties/mappers/property.mapper';
+import { toUserResponse } from '../users/mappers/user.mapper';
 import {
   AnalyticsRepository,
   type ConversionFunnel,
@@ -47,7 +49,7 @@ export class AdminService {
   async findUsers(query: AdminUserQueryDto) {
     const { items, total } = await this.usersRepository.findMany(query);
     return {
-      items,
+      items: items.map(toUserResponse),
       meta: {
         total,
         page: query.page,
@@ -62,7 +64,8 @@ export class AdminService {
       throw new ForbiddenException('Cannot change your own role');
     }
     try {
-      return await this.usersRepository.updateRole(targetId, role);
+      const user = await this.usersRepository.updateRole(targetId, role);
+      return toUserResponse(user);
     } catch (error) {
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&
@@ -83,7 +86,8 @@ export class AdminService {
       throw new ForbiddenException('Cannot block/unblock yourself');
     }
     try {
-      return await this.usersRepository.setBlocked(targetId, isBlocked);
+      const user = await this.usersRepository.setBlocked(targetId, isBlocked);
+      return toUserResponse(user);
     } catch (error) {
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&
@@ -96,14 +100,22 @@ export class AdminService {
   }
 
   async findProperties(query: AdminPropertyQueryDto) {
-    return this.propertiesService.findManyForAdmin(query);
+    const result = await this.propertiesService.findManyForAdmin(query);
+    return {
+      items: result.items.map(toPropertyResponse),
+      meta: result.meta,
+    };
   }
 
   async updatePropertyModeration(
     id: string,
     moderationStatus: 'APPROVED' | 'REJECTED',
   ) {
-    return this.propertiesService.updateModerationStatus(id, moderationStatus);
+    const property = await this.propertiesService.updateModerationStatus(
+      id,
+      moderationStatus,
+    );
+    return toPropertyResponse(property);
   }
 
   async getDashboard(): Promise<AdminDashboard> {

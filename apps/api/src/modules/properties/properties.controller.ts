@@ -24,6 +24,7 @@ import { JwtAccessGuard } from '../auth/guards/jwt-access.guard';
 import { PropertyOwnershipGuard } from './guards/property-ownership.guard';
 import type { CurrentUserPayload } from '../auth/types/current-user.type';
 import { PropertiesService } from './properties.service';
+import { toPropertyResponse } from './mappers/property.mapper';
 
 @Controller('properties')
 @UseGuards(JwtAccessGuard)
@@ -34,13 +35,24 @@ export class PropertiesController {
   async findMany(
     @Query(new ZodValidationPipe(PropertyQuerySchema)) query: PropertyQueryDto,
   ) {
-    return this.propertiesService.findMany(query);
+    const result = await this.propertiesService.findMany(query);
+    return {
+      items: result.items.map(toPropertyResponse),
+      meta: result.meta,
+    };
   }
 
   @Get('my')
   async findMyProperties(@CurrentUser() currentUser: CurrentUserPayload) {
     const query = PropertyQuerySchema.parse({});
-    return this.propertiesService.findMyProperties(currentUser.id, query);
+    const result = await this.propertiesService.findMyProperties(
+      currentUser.id,
+      query,
+    );
+    return {
+      items: result.items.map(toPropertyResponse),
+      meta: result.meta,
+    };
   }
 
   @Get(':id')
@@ -48,7 +60,8 @@ export class PropertiesController {
     @Param('id') id: string,
     @CurrentUser() currentUser: CurrentUserPayload,
   ) {
-    return this.propertiesService.findOne(id, currentUser);
+    const result = await this.propertiesService.findOne(id, currentUser);
+    return toPropertyResponse(result);
   }
 
   @Post()
@@ -56,7 +69,8 @@ export class PropertiesController {
     @Body(new ZodValidationPipe(CreatePropertySchema)) dto: CreatePropertyDto,
     @CurrentUser() currentUser: CurrentUserPayload,
   ) {
-    return this.propertiesService.create(dto, currentUser.id);
+    const result = await this.propertiesService.create(dto, currentUser.id);
+    return toPropertyResponse(result);
   }
 
   @Patch(':id')
@@ -65,7 +79,8 @@ export class PropertiesController {
     @Param('id') id: string,
     @Body(new ZodValidationPipe(UpdatePropertySchema)) dto: CreatePropertyDto,
   ) {
-    return this.propertiesService.update(id, dto);
+    const result = await this.propertiesService.update(id, dto);
+    return toPropertyResponse(result);
   }
 
   @Delete(':id')

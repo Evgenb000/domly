@@ -7,11 +7,11 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import type { Booking } from '@prisma/client';
 import type { Queue } from 'bullmq';
 import {
   BOOKINGS_REPOSITORY,
   BookingFilters,
+  BookingWithPropertyAndOwner,
   IBookingsRepository,
   PaginatedBookings,
 } from './repositories/bookings-repository.interface';
@@ -32,7 +32,10 @@ export class BookingsService {
     private readonly autoCancelQueue: Queue<BookingAutoCancelJobPayload>,
   ) {}
 
-  async create(propertyId: string, userId: string): Promise<Booking> {
+  async create(
+    propertyId: string,
+    userId: string,
+  ): Promise<BookingWithPropertyAndOwner> {
     const booking = await this.bookingsRepository.createWithPropertyLock(
       propertyId,
       userId,

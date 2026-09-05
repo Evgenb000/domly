@@ -92,3 +92,29 @@ export const AdminPropertyQuerySchema = propertyQueryBaseSchema
   .refine(validatePriceRange, priceRangeIssue);
 
 export type AdminPropertyQueryDto = z.infer<typeof AdminPropertyQuerySchema>;
+
+export const PropertyResponseSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  description: z.string(),
+  category: PropertyCategoryEnum,
+  dealType: DealTypeEnum,
+  status: z.enum(["AVAILABLE", "RESERVED"]),
+  moderationStatus: z.enum(["APPROVED", "REJECTED"]),
+  price: z.number().nullable(),
+  pricePerNight: z.number().nullable(),
+  minStayNights: z.number().nullable(),
+  hasDeposit: z.boolean().nullable(),
+  effectivePrice: z.number(),
+  area: z.number(),
+  address: z.string().nullable(),
+  latitude: z.number(),
+  longitude: z.number(),
+  photos: z.array(z.string()),
+  viewsCount: z.number(),
+  ownerId: z.string(),
+  districtId: z.string(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+export type PropertyResponseDto = z.infer<typeof PropertyResponseSchema>;

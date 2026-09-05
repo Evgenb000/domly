@@ -6,6 +6,7 @@ import {
   FavoriteWithProperty,
   IFavoritesRepository,
 } from './repositories/favorites-repository.interface';
+import { toPropertyResponse } from '../properties/mappers/property.mapper';
 
 @Injectable()
 export class FavoritesService {
@@ -56,28 +57,11 @@ export class FavoritesService {
   private mapToResponseDto(
     favorite: FavoriteWithProperty,
   ): FavoriteResponseDto {
-    const { property } = favorite;
-
     return {
       id: favorite.id,
       propertyId: favorite.propertyId,
-      userId: favorite.userId,
+      property: toPropertyResponse(favorite.property),
       createdAt: favorite.createdAt.toISOString(),
-      property: {
-        id: property.id,
-        title: property.title,
-        category: property.category,
-        dealType: property.dealType,
-        status: property.status,
-        price: property.price,
-        pricePerNight: property.pricePerNight,
-        minStayNights: property.minStayNights,
-        effectivePrice: property.effectivePrice,
-        area: property.area,
-        address: property.address,
-        districtId: property.districtId,
-        photos: property.photos,
-      },
     };
   }
 }

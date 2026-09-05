@@ -17,3 +17,14 @@ export const AdminUserQuerySchema = z.object({
   isBlocked: z.coerce.boolean().optional(),
 });
 export type AdminUserQueryDto = z.infer<typeof AdminUserQuerySchema>;
+
+export const UserResponseSchema = z.object({
+  id: z.string(),
+  email: z.string(),
+  name: z.string(),
+  role: z.enum(["USER", "REALTOR", "DEVELOPER", "ADMIN"]),
+  emailVerified: z.boolean(),
+  isBlocked: z.boolean(),
+  createdAt: z.string(),
+});
+export type UserResponseDto = z.infer<typeof UserResponseSchema>;

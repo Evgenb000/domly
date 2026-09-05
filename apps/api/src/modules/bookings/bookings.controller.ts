@@ -22,6 +22,7 @@ import { JwtAccessGuard } from '../auth/guards/jwt-access.guard';
 import type { CurrentUserPayload } from '../auth/types/current-user.type';
 import { BookingsService } from './bookings.service';
 import { BookingAccessGuard } from './guards/booking-access.guard';
+import { toBookingResponse } from './mappers/booking.mapper';
 
 @Controller('bookings')
 @UseGuards(JwtAccessGuard)
@@ -34,7 +35,11 @@ export class BookingsController {
     @Body(new ZodValidationPipe(CreateBookingSchema)) dto: CreateBookingDto,
     @CurrentUser() currentUser: CurrentUserPayload,
   ) {
-    return this.bookingsService.create(dto.propertyId, currentUser.id);
+    const result = await this.bookingsService.create(
+      dto.propertyId,
+      currentUser.id,
+    );
+    return toBookingResponse(result);
   }
 
   @Get('my')
@@ -49,7 +54,7 @@ export class BookingsController {
       query.limit,
     );
     return {
-      items,
+      items: items.map(toBookingResponse),
       meta: {
         total,
         page: query.page,

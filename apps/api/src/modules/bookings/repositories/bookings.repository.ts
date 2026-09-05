@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import type { Booking, Prisma } from '@prisma/client';
+import type { Prisma } from '@prisma/client';
 import { PrismaService } from '../../../infrastructure/prisma/prisma.service';
 import type {
   BookingFilters,
@@ -15,7 +15,7 @@ export class BookingsRepository implements IBookingsRepository {
   async createWithPropertyLock(
     propertyId: string,
     userId: string,
-  ): Promise<Booking | null> {
+  ): Promise<BookingWithPropertyAndOwner | null> {
     return this.prisma.$transaction(async (tx) => {
       const updated = await tx.property.updateMany({
         where: {
@@ -35,7 +35,7 @@ export class BookingsRepository implements IBookingsRepository {
           property: { connect: { id: propertyId } },
           user: { connect: { id: userId } },
         },
-        include: { property: true },
+        include: { property: { include: { owner: true } } },
       });
     });
   }
@@ -67,7 +67,7 @@ export class BookingsRepository implements IBookingsRepository {
         skip,
         take: limit,
         orderBy: { createdAt: 'desc' },
-        include: { property: true },
+        include: { property: { include: { owner: true } } },
       }),
       this.prisma.booking.count({ where }),
     ]);

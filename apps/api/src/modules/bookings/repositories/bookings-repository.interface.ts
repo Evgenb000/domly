@@ -1,4 +1,4 @@
-import type { Booking, BookingStatus, Prisma } from '@prisma/client';
+import type { BookingStatus, Prisma } from '@prisma/client';
 
 export const BOOKINGS_REPOSITORY = Symbol('BOOKINGS_REPOSITORY');
 
@@ -11,7 +11,7 @@ export interface BookingFilters {
 }
 
 export interface PaginatedBookings {
-  items: Booking[];
+  items: BookingWithPropertyAndOwner[];
   total: number;
 }
 
@@ -19,7 +19,7 @@ export interface IBookingsRepository {
   createWithPropertyLock(
     propertyId: string,
     userId: string,
-  ): Promise<Booking | null>;
+  ): Promise<BookingWithPropertyAndOwner | null>;
   findById(id: string): Promise<BookingWithPropertyAndOwner | null>;
   findManyByUser(
     userId: string,
