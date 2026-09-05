@@ -32,7 +32,6 @@ describe('Properties (e2e)', () => {
   let adminToken: string;
   let ownerId: string;
   let bookerId: string;
-  let adminId: string;
 
   let districtId: string;
   let districtCreated = false;
@@ -150,7 +149,6 @@ describe('Properties (e2e)', () => {
 
     ownerId = owner.id;
     bookerId = booker.id;
-    adminId = admin.id;
 
     let district = await prisma.district.findFirst({
       include: { city: true },
@@ -377,7 +375,7 @@ describe('Properties (e2e)', () => {
         .expect(404);
     });
   });
-describe('GET /properties (публичный список)', () => {
+  describe('GET /properties (публичный список)', () => {
     it('REJECTED объявление не видно в публичном списке, APPROVED видно', async () => {
       const approved = await seedProperty();
       const rejected = await seedProperty({ moderationStatus: 'REJECTED' });

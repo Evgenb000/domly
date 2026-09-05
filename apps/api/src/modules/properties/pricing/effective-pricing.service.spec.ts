@@ -2,6 +2,7 @@ import type { CreatePropertyDto } from '@domly/shared';
 import { EffectivePricingService } from './effective-pricing.service';
 import { NightlyPriceStrategy } from './nightly-price.strategy';
 import { StandardPriceStrategy } from './standard-price.strategy';
+import { describe, expect, it } from '@jest/globals';
 
 const baseFields = {
   title: 'Сучасна квартира біля парку',
@@ -36,11 +37,18 @@ describe('StandardPriceStrategy', () => {
 
   it.each([
     { dealType: 'SALE', dto: saleDto(250000), expected: 250000 },
-    { dealType: 'LONG_TERM_RENT', dto: longTermRentDto(15000), expected: 15000 },
-  ] as const)('supports $dealType and returns price as is', ({ dto, expected }) => {
-    expect(strategy.supports(dto.dealType)).toBe(true);
-    expect(strategy.calculate(dto)).toBe(expected);
-  });
+    {
+      dealType: 'LONG_TERM_RENT',
+      dto: longTermRentDto(15000),
+      expected: 15000,
+    },
+  ] as const)(
+    'supports $dealType and returns price as is',
+    ({ dto, expected }) => {
+      expect(strategy.supports(dto.dealType)).toBe(true);
+      expect(strategy.calculate(dto)).toBe(expected);
+    },
+  );
 
   it('returns the exact price field value for SALE', () => {
     const dto = saleDto(250000);
