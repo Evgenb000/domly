@@ -75,4 +75,9 @@ export class AdminController {
   ) {
     return this.adminService.updatePropertyModeration(id, dto.moderationStatus);
   }
+
+  @Get('analytics/dashboard')
+  async getDashboard() {
+    return this.adminService.getDashboard();
+  }
 }

@@ -10,7 +10,29 @@ import {
   IUsersRepository,
   USERS_REPOSITORY,
 } from '../users/repositories/users-repository.interface';
+import { RedisService } from '../../infrastructure/redis/redis.service';
 import { PropertiesService } from '../properties/properties.service';
+import {
+  AnalyticsRepository,
+  type ConversionFunnel,
+  type DailyStat,
+  type TopProperty,
+} from './repositories/analytics.repository';
+
+export interface AdminDashboard {
+  counts: {
+    totalUsers: number;
+    totalProperties: number;
+    totalBookings: number;
+  };
+  dailyStats: {
+    users: DailyStat[];
+    properties: DailyStat[];
+    bookings: DailyStat[];
+  };
+  topProperties: TopProperty[];
+  funnel: ConversionFunnel;
+}
 
 @Injectable()
 export class AdminService {
@@ -18,6 +40,8 @@ export class AdminService {
     @Inject(USERS_REPOSITORY)
     private readonly usersRepository: IUsersRepository,
     private readonly propertiesService: PropertiesService,
+    private readonly analyticsRepository: AnalyticsRepository,
+    private readonly redisService: RedisService,
   ) {}
 
   async findUsers(query: AdminUserQueryDto) {
@@ -80,5 +104,44 @@ export class AdminService {
     moderationStatus: 'APPROVED' | 'REJECTED',
   ) {
     return this.propertiesService.updateModerationStatus(id, moderationStatus);
+  }
+
+  async getDashboard(): Promise<AdminDashboard> {
+    const cacheKey = 'admin:analytics:dashboard';
+    const cached = await this.redisService.get(cacheKey);
+    if (cached) {
+      return JSON.parse(cached) as AdminDashboard;
+    }
+
+    const [
+      counts,
+      dailyUsers,
+      dailyProperties,
+      dailyBookings,
+      topProperties,
+      funnel,
+    ] = await Promise.all([
+      this.analyticsRepository.getPlatformCounts(),
+      this.analyticsRepository.getDailyNewUsers(),
+      this.analyticsRepository.getDailyNewProperties(),
+      this.analyticsRepository.getDailyNewBookings(),
+      this.analyticsRepository.getTopPropertiesByViews(10),
+      this.analyticsRepository.getConversionFunnel(),
+    ]);
+
+    const dashboard = {
+      counts,
+      dailyStats: {
+        users: dailyUsers,
+        properties: dailyProperties,
+        bookings: dailyBookings,
+      },
+      topProperties,
+      funnel,
+    };
+
+    await this.redisService.set(cacheKey, JSON.stringify(dashboard), 300);
+
+    return dashboard;
   }
 }
