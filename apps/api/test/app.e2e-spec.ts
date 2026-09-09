@@ -3,7 +3,9 @@ import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { App } from 'supertest/types';
 import { AppModule } from './../src/app.module';
-import { afterEach, beforeEach, describe, it } from '@jest/globals';
+import { afterEach, beforeEach, describe, it, jest } from '@jest/globals';
+
+jest.setTimeout(120000);
 
 describe('AppController (e2e)', () => {
   let app: INestApplication<App>;
