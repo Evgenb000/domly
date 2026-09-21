@@ -151,6 +151,21 @@ describe('Bookings (e2e)', () => {
     await prisma.user.deleteMany({
       where: { id: { in: [ownerId, bookerId] } },
     });
+
+    try {
+      const bookingQueue = app.get<Queue>(getQueueToken('booking-auto-cancel'));
+      await bookingQueue.close();
+    } catch {
+      // очередь уже закрыта или недоступна — не блокируем teardown
+    }
+
+    try {
+      const emailsQueue = app.get<Queue>(getQueueToken('emails'));
+      await emailsQueue.close();
+    } catch {
+      // очередь уже закрыта или недоступна — не блокируем teardown
+    }
+
     await app.close();
   });
 
