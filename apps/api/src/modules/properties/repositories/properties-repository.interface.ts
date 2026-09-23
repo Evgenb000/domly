@@ -3,7 +3,11 @@ import type {
   CreatePropertyDto,
   PropertyQueryDto,
 } from '@domly/shared';
-import type { Property } from '@prisma/client';
+import { Prisma } from '@prisma/client';
+
+export type PropertyWithDistrict = Prisma.PropertyGetPayload<{
+  include: { district: { include: { city: true } } };
+}>;
 
 export interface PropertyCreateInput {
   data: CreatePropertyDto;
@@ -17,7 +21,7 @@ export interface PropertyUpdateInput {
 }
 
 export interface PaginatedProperties {
-  items: Property[];
+  items: PropertyWithDistrict[];
   total: number;
 }
 
@@ -30,13 +34,13 @@ export interface IPropertiesRepository {
     query: PropertyQueryDto,
   ): Promise<PaginatedProperties>;
   findManyForAdmin(query: AdminPropertyQueryDto): Promise<PaginatedProperties>;
-  findById(id: string): Promise<Property | null>;
-  create(input: PropertyCreateInput): Promise<Property>;
-  update(id: string, input: PropertyUpdateInput): Promise<Property>;
+  findById(id: string): Promise<PropertyWithDistrict | null>;
+  create(input: PropertyCreateInput): Promise<PropertyWithDistrict>;
+  update(id: string, input: PropertyUpdateInput): Promise<PropertyWithDistrict>;
   delete(id: string): Promise<void>;
   incrementViews(id: string): Promise<void>;
   updateModerationStatus(
     id: string,
     moderationStatus: 'APPROVED' | 'REJECTED',
-  ): Promise<Property>;
+  ): Promise<PropertyWithDistrict>;
 }

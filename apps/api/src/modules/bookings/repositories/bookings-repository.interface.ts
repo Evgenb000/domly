@@ -3,7 +3,11 @@ import type { BookingStatus, Prisma } from '@prisma/client';
 export const BOOKINGS_REPOSITORY = Symbol('BOOKINGS_REPOSITORY');
 
 export type BookingWithPropertyAndOwner = Prisma.BookingGetPayload<{
-  include: { property: { include: { owner: true } } };
+  include: {
+    property: {
+      include: { owner: true; district: { include: { city: true } } };
+    };
+  };
 }>;
 
 export interface BookingFilters {

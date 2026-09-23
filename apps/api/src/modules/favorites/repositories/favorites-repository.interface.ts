@@ -3,7 +3,11 @@ import type { Prisma } from '@prisma/client';
 export const FAVORITES_REPOSITORY = Symbol('FAVORITES_REPOSITORY');
 
 export type FavoriteWithProperty = Prisma.FavoriteGetPayload<{
-  include: { property: true };
+  include: {
+    property: {
+      include: { district: { include: { city: true } } };
+    };
+  };
 }>;
 
 export interface IFavoritesRepository {

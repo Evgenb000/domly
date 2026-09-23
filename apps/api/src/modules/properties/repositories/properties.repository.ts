@@ -1,12 +1,13 @@
 import type { AdminPropertyQueryDto, PropertyQueryDto } from '@domly/shared';
 import { Injectable } from '@nestjs/common';
-import { Prisma, Property } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../../infrastructure/prisma/prisma.service';
 import {
   IPropertiesRepository,
   PaginatedProperties,
   PropertyCreateInput,
   PropertyUpdateInput,
+  PropertyWithDistrict,
 } from './properties-repository.interface';
 
 @Injectable()
@@ -33,27 +34,32 @@ export class PropertiesRepository implements IPropertiesRepository {
     return this.paginate(where, query);
   }
 
-  async findById(id: string): Promise<Property | null> {
-    return this.prisma.property.findUnique({ where: { id } });
+  async findById(id: string): Promise<PropertyWithDistrict | null> {
+    return this.prisma.property.findUnique({
+      where: { id },
+      include: { district: { include: { city: true } } },
+    });
   }
 
-  async create(input: PropertyCreateInput): Promise<Property> {
+  async create(input: PropertyCreateInput): Promise<PropertyWithDistrict> {
     return this.prisma.property.create({
       data: {
         ...input.data,
         ownerId: input.ownerId,
         effectivePrice: input.effectivePrice,
       },
+      include: { district: { include: { city: true } } },
     });
   }
 
-  async update(id: string, input: PropertyUpdateInput): Promise<Property> {
+  async update(id: string, input: PropertyUpdateInput): Promise<PropertyWithDistrict> {
     return this.prisma.property.update({
       where: { id },
       data: {
         ...input.data,
         effectivePrice: input.effectivePrice,
       },
+      include: { district: { include: { city: true } } },
     });
   }
 
@@ -81,10 +87,11 @@ export class PropertiesRepository implements IPropertiesRepository {
   async updateModerationStatus(
     id: string,
     moderationStatus: 'APPROVED' | 'REJECTED',
-  ): Promise<Property> {
+  ): Promise<PropertyWithDistrict> {
     return this.prisma.property.update({
       where: { id },
       data: { moderationStatus },
+      include: { district: { include: { city: true } } },
     });
   }
 
@@ -101,6 +108,7 @@ export class PropertiesRepository implements IPropertiesRepository {
         orderBy,
         skip,
         take: query.limit,
+        include: { district: { include: { city: true } } },
       }),
       this.prisma.property.count({ where }),
     ]);

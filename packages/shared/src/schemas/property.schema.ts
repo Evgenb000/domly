@@ -114,6 +114,8 @@ export const PropertyResponseSchema = z.object({
   viewsCount: z.number(),
   ownerId: z.string(),
   districtId: z.string(),
+  districtName: z.string(),
+  cityName: z.string(),
   createdAt: z.string(),
   updatedAt: z.string(),
 });

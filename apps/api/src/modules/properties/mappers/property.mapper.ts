@@ -1,7 +1,7 @@
 import type { PropertyResponseDto } from '@domly/shared';
-import type { Property } from '@prisma/client';
+import type { PropertyWithDistrict } from '../repositories/properties-repository.interface';
 
-export function toPropertyResponse(property: Property): PropertyResponseDto {
+export function toPropertyResponse(property: PropertyWithDistrict): PropertyResponseDto {
   return {
     id: property.id,
     title: property.title,
@@ -23,6 +23,8 @@ export function toPropertyResponse(property: Property): PropertyResponseDto {
     viewsCount: property.viewsCount,
     ownerId: property.ownerId,
     districtId: property.districtId,
+    districtName: property.district.name,
+    cityName: property.district.city.name,
     createdAt: property.createdAt.toISOString(),
     updatedAt: property.updatedAt.toISOString(),
   };

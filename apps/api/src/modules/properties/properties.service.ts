@@ -10,7 +10,6 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import type { Property } from '@prisma/client';
 import { Prisma } from '@prisma/client';
 import type { CurrentUserPayload } from '../auth/types/current-user.type';
 import { RedisService } from '../../infrastructure/redis/redis.service';
@@ -18,6 +17,7 @@ import { EffectivePricingService } from './pricing/effective-pricing.service';
 import {
   IPropertiesRepository,
   PROPERTIES_REPOSITORY,
+  PropertyWithDistrict,
 } from './repositories/properties-repository.interface';
 
 export interface PaginatedResult<T> {
@@ -41,7 +41,9 @@ export class PropertiesService {
     private readonly redisService: RedisService,
   ) {}
 
-  async findMany(query: PropertyQueryDto): Promise<PaginatedResult<Property>> {
+  async findMany(
+    query: PropertyQueryDto,
+  ): Promise<PaginatedResult<PropertyWithDistrict>> {
     const { items, total } = await this.propertiesRepository.findMany(query);
     return this.paginate(items, total, query);
   }
@@ -49,7 +51,7 @@ export class PropertiesService {
   async findMyProperties(
     ownerId: string,
     query: PropertyQueryDto,
-  ): Promise<PaginatedResult<Property>> {
+  ): Promise<PaginatedResult<PropertyWithDistrict>> {
     const { items, total } = await this.propertiesRepository.findManyByOwner(
       ownerId,
       query,
@@ -59,7 +61,7 @@ export class PropertiesService {
 
   async findManyForAdmin(
     query: AdminPropertyQueryDto,
-  ): Promise<PaginatedResult<Property>> {
+  ): Promise<PaginatedResult<PropertyWithDistrict>> {
     const { items, total } =
       await this.propertiesRepository.findManyForAdmin(query);
     return this.paginate(items, total, query);
@@ -68,7 +70,7 @@ export class PropertiesService {
   async findOne(
     id: string,
     currentUser?: CurrentUserPayload,
-  ): Promise<Property> {
+  ): Promise<PropertyWithDistrict> {
     const property = await this.propertiesRepository.findById(id);
     if (!property) {
       throw new NotFoundException('Property not found');
@@ -102,7 +104,10 @@ export class PropertiesService {
     return property;
   }
 
-  async create(dto: CreatePropertyDto, ownerId: string): Promise<Property> {
+  async create(
+    dto: CreatePropertyDto,
+    ownerId: string,
+  ): Promise<PropertyWithDistrict> {
     const effectivePrice = this.effectivePricingService.calculate(dto);
     return this.propertiesRepository.create({
       data: dto,
@@ -111,7 +116,10 @@ export class PropertiesService {
     });
   }
 
-  async update(id: string, dto: CreatePropertyDto): Promise<Property> {
+  async update(
+    id: string,
+    dto: CreatePropertyDto,
+  ): Promise<PropertyWithDistrict> {
     const existing = await this.propertiesRepository.findById(id);
     if (existing && existing.dealType !== dto.dealType) {
       throw new ConflictException('dealType cannot be changed after creation');
@@ -151,7 +159,7 @@ export class PropertiesService {
   async updateModerationStatus(
     id: string,
     moderationStatus: 'APPROVED' | 'REJECTED',
-  ): Promise<Property> {
+  ): Promise<PropertyWithDistrict> {
     try {
       return await this.propertiesRepository.updateModerationStatus(
         id,
@@ -169,10 +177,10 @@ export class PropertiesService {
   }
 
   private paginate(
-    items: Property[],
+    items: PropertyWithDistrict[],
     total: number,
     query: PropertyQueryDto,
-  ): PaginatedResult<Property> {
+  ): PaginatedResult<PropertyWithDistrict> {
     return {
       items,
       meta: {

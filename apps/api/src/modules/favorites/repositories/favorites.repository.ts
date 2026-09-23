@@ -20,7 +20,11 @@ export class FavoritesRepository implements IFavoritesRepository {
           propertyId,
         },
       },
-      include: { property: true },
+      include: {
+        property: {
+          include: { district: { include: { city: true } } },
+        },
+      },
     });
   }
 
@@ -30,7 +34,11 @@ export class FavoritesRepository implements IFavoritesRepository {
   ): Promise<FavoriteWithProperty> {
     return this.prisma.favorite.create({
       data: { userId, propertyId },
-      include: { property: true },
+      include: {
+        property: {
+          include: { district: { include: { city: true } } },
+        },
+      },
     });
   }
 
@@ -47,7 +55,11 @@ export class FavoritesRepository implements IFavoritesRepository {
     return this.prisma.favorite.findMany({
       where: { userId },
       orderBy: { createdAt: 'desc' },
-      include: { property: true },
+      include: {
+        property: {
+          include: { district: { include: { city: true } } },
+        },
+      },
     });
   }
 }

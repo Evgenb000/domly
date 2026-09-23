@@ -35,7 +35,11 @@ export class BookingsRepository implements IBookingsRepository {
           property: { connect: { id: propertyId } },
           user: { connect: { id: userId } },
         },
-        include: { property: { include: { owner: true } } },
+        include: {
+          property: {
+            include: { owner: true, district: { include: { city: true } } },
+          },
+        },
       });
     });
   }
@@ -43,7 +47,11 @@ export class BookingsRepository implements IBookingsRepository {
   async findById(id: string): Promise<BookingWithPropertyAndOwner | null> {
     return this.prisma.booking.findUnique({
       where: { id },
-      include: { property: { include: { owner: true } } },
+      include: {
+        property: {
+          include: { owner: true, district: { include: { city: true } } },
+        },
+      },
     });
   }
 
@@ -67,7 +75,11 @@ export class BookingsRepository implements IBookingsRepository {
         skip,
         take: limit,
         orderBy: { createdAt: 'desc' },
-        include: { property: { include: { owner: true } } },
+        include: {
+          property: {
+            include: { owner: true, district: { include: { city: true } } },
+          },
+        },
       }),
       this.prisma.booking.count({ where }),
     ]);
