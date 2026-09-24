@@ -25,7 +25,7 @@ export function PropertyCard({ property }: PropertyCardProps) {
 
   return (
     <Card className="overflow-hidden border-border bg-card p-4">
-      <div className="relative mb-3 aspect-[4/3] w-full overflow-hidden rounded-lg bg-secondary">
+      <div className="relative mb-3 aspect-4/3 w-full overflow-hidden rounded-lg bg-secondary">
         {property.photos[0] ? (
           <Image
             src={property.photos[0]}
