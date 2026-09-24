@@ -21,13 +21,13 @@ import {
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { JwtAccessGuard } from '../auth/guards/jwt-access.guard';
+import { JwtOptionalAuthGuard } from '../auth/guards/jwt-optional-auth.guard';
 import { PropertyOwnershipGuard } from './guards/property-ownership.guard';
 import type { CurrentUserPayload } from '../auth/types/current-user.type';
 import { PropertiesService } from './properties.service';
 import { toPropertyResponse } from './mappers/property.mapper';
 
 @Controller('properties')
-@UseGuards(JwtAccessGuard)
 export class PropertiesController {
   constructor(private readonly propertiesService: PropertiesService) {}
 
@@ -43,6 +43,7 @@ export class PropertiesController {
   }
 
   @Get('my')
+  @UseGuards(JwtAccessGuard)
   async findMyProperties(@CurrentUser() currentUser: CurrentUserPayload) {
     const query = PropertyQuerySchema.parse({});
     const result = await this.propertiesService.findMyProperties(
@@ -56,15 +57,17 @@ export class PropertiesController {
   }
 
   @Get(':id')
+  @UseGuards(JwtOptionalAuthGuard)
   async findOne(
     @Param('id') id: string,
-    @CurrentUser() currentUser: CurrentUserPayload,
+    @CurrentUser() currentUser: CurrentUserPayload | undefined,
   ) {
     const result = await this.propertiesService.findOne(id, currentUser);
     return toPropertyResponse(result);
   }
 
   @Post()
+  @UseGuards(JwtAccessGuard)
   async create(
     @Body(new ZodValidationPipe(CreatePropertySchema)) dto: CreatePropertyDto,
     @CurrentUser() currentUser: CurrentUserPayload,
@@ -74,7 +77,7 @@ export class PropertiesController {
   }
 
   @Patch(':id')
-  @UseGuards(PropertyOwnershipGuard)
+  @UseGuards(JwtAccessGuard, PropertyOwnershipGuard)
   async update(
     @Param('id') id: string,
     @Body(new ZodValidationPipe(UpdatePropertySchema)) dto: CreatePropertyDto,
@@ -85,7 +88,7 @@ export class PropertiesController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @UseGuards(PropertyOwnershipGuard)
+  @UseGuards(JwtAccessGuard, PropertyOwnershipGuard)
   async remove(@Param('id') id: string): Promise<void> {
     await this.propertiesService.remove(id);
   }
