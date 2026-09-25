@@ -25,7 +25,8 @@ Pet-проект коммерческого уровня для портфоли
 6. **Zod-схемы — единственный источник правды** для валидации: пишутся в `packages/shared` и
    переиспользуются как в NestJS (`nestjs-zod` + `ZodValidationPipe`), так и в React Hook Form на
    фронтенде. Не дублировать одну и ту же схему валидации в двух местах.
-7. **memory-bank**: в начале задачи — прочитай memory-bank/progress.md и memory-bank/decisions.md.
+7. **memory-bank**: в начале задачи — прочитай `.clinerules/memory-bank/progress.md` и
+   `.clinerules/memory-bank/decisions.md`.
    В конце задачи — обнови progress.md (что сделано/что осталось) и, ЕСЛИ по ходу реализации
    пришлось принять решение, не покрытое .clinerules (00-05) — зафиксируй его в decisions.md
    с датой и коротким обоснованием "почему". Не дублировать в decisions.md то, что уже
