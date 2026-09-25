@@ -24,3 +24,10 @@ export interface Property {
   cityName: string;
   createdAt: string;
 }
+
+export interface PaginationMeta {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
