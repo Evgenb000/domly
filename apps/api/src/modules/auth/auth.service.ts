@@ -1,3 +1,4 @@
+import type { AuthUserDto } from '@domly/shared';
 import {
   BadRequestException,
   ConflictException,
@@ -74,12 +75,7 @@ export class AuthService {
     });
 
     return {
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        role: user.role,
-      },
+      user: this.toAuthUser(user),
       ...tokens,
     };
   }
@@ -98,12 +94,7 @@ export class AuthService {
     const tokens = await this.issueTokens(user.id, user.role);
 
     return {
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        role: user.role,
-      },
+      user: this.toAuthUser(user),
       ...tokens,
     };
   }
@@ -138,12 +129,7 @@ export class AuthService {
     const tokens = await this.issueTokens(user.id, user.role);
 
     return {
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        role: user.role,
-      },
+      user: this.toAuthUser(user),
       ...tokens,
     };
   }
@@ -311,5 +297,27 @@ export class AuthService {
       default:
         return 7 * 24 * 60 * 60;
     }
+  }
+
+  async getCurrentUser(userId: string) {
+    const user = await this.usersRepository.findById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return this.toAuthUser(user);
+  }
+
+  private toAuthUser(user: {
+    id: string;
+    email: string;
+    name: string;
+    role: string;
+  }): AuthUserDto {
+    return {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      role: user.role as AuthUserDto['role'],
+    };
   }
 }

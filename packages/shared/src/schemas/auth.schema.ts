@@ -33,3 +33,11 @@ export const oauthExchangeSchema = z.object({
   code: z.string().min(1),
 });
 export type OauthExchangeDto = z.infer<typeof oauthExchangeSchema>;
+
+export const authUserSchema = z.object({
+  id: z.string(),
+  email: z.string().email(),
+  name: z.string(),
+  role: z.enum(["USER", "REALTOR", "DEVELOPER", "ADMIN"]),
+});
+export type AuthUserDto = z.infer<typeof authUserSchema>;
