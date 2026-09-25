@@ -14,6 +14,25 @@ const anyLayer = {
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
+  // Underscore-prefixed variables/args are intentionally unused (destructuring
+  // rest-siblings, callback params) — standard ignore pattern.
+  {
+    rules: {
+      "no-unused-vars": "off",
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        {
+          args: "after-used",
+          argsIgnorePattern: "^_",
+          caughtErrors: "none",
+          destructuredArrayIgnorePattern: "^_",
+          ignoreRestSiblings: false,
+          vars: "all",
+          varsIgnorePattern: "^_",
+        },
+      ],
+    },
+  },
   // Override default ignores of eslint-config-next.
   globalIgnores([
     // Default ignores of eslint-config-next:

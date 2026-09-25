@@ -1,0 +1,1 @@
+export { getMe as me } from "@/shared/session/me";
