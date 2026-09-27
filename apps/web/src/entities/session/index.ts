@@ -5,3 +5,5 @@ export { refresh } from "./api/refresh";
 export { logout } from "./api/logout";
 export { me } from "./api/me";
 export { exchangeOAuthCode } from "./api/exchangeOAuthCode";
+export { verifyEmail } from "./api/verifyEmail";
+export { resendVerification } from "./api/resendVerification";

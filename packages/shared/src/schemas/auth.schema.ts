@@ -39,5 +39,6 @@ export const authUserSchema = z.object({
   email: z.string().email(),
   name: z.string(),
   role: z.enum(["USER", "REALTOR", "DEVELOPER", "ADMIN"]),
+  emailVerified: z.boolean(),
 });
 export type AuthUserDto = z.infer<typeof authUserSchema>;

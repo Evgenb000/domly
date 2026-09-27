@@ -312,12 +312,14 @@ export class AuthService {
     email: string;
     name: string;
     role: string;
+    emailVerified: boolean;
   }): AuthUserDto {
     return {
       id: user.id,
       email: user.email,
       name: user.name,
       role: user.role as AuthUserDto['role'],
+      emailVerified: user.emailVerified,
     };
   }
 }
