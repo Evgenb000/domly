@@ -16,3 +16,5 @@ export * from "./schemas/user.schema";
 export * from "./schemas/booking.schema";
 
 export * from "./schemas/favorite.schema";
+
+export * from "./schemas/location.schema";

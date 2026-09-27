@@ -5,6 +5,7 @@ import type { PropertyQueryDto } from "@domly/shared";
 
 import { getProperties } from "@/entities/property/api/getProperties";
 import type { PaginationMeta, Property } from "@/entities/property/model/types";
+import type { PropertyFilterValues } from "@/entities/property";
 import { PropertyCard } from "@/entities/property/ui/PropertyCard";
 import { useIntersectionObserver } from "@/shared/hooks/useIntersectionObserver";
 import {
@@ -26,11 +27,6 @@ const SORT_OPTIONS: Array<{ value: SortKey; label: string }> = [
   { value: "price_asc", label: "Ціна: від дешевших" },
   { value: "price_desc", label: "Ціна: від дорогих" },
 ];
-
-const DEFAULT_SORT: { sortBy: SortBy; sortOrder: SortOrder } = {
-  sortBy: "createdAt",
-  sortOrder: "desc",
-};
 
 function parseSortKey(key: SortKey): { sortBy: SortBy; sortOrder: SortOrder } {
   const [sortBy, sortOrder] = key.split("_");
@@ -55,25 +51,37 @@ function PropertyCardSkeleton() {
   );
 }
 
-export function PropertyFeed() {
+interface PropertyFeedProps {
+  filters: PropertyFilterValues;
+  sortBy: SortBy;
+  sortOrder: SortOrder;
+  onSortChange: (sortBy: SortBy, sortOrder: SortOrder) => void;
+}
+
+export function PropertyFeed({
+  filters,
+  sortBy,
+  sortOrder,
+  onSortChange,
+}: PropertyFeedProps) {
   const [items, setItems] = useState<Property[]>([]);
   const [page, setPage] = useState(1);
   const [meta, setMeta] = useState<PaginationMeta | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [sortBy, setSortBy] = useState<SortBy>(DEFAULT_SORT.sortBy);
-  const [sortOrder, setSortOrder] = useState<SortOrder>(DEFAULT_SORT.sortOrder);
 
   const requestIdRef = useRef(0);
 
-  const fetchFirstPage = async (
+  async function fetchFirstPage(
+    nextFilters: PropertyFilterValues,
     nextSortBy: SortBy,
     nextSortOrder: SortOrder,
-  ) => {
+  ) {
     const requestId = ++requestIdRef.current;
     setIsLoading(true);
     try {
       const result = await getProperties({
+        ...nextFilters,
         sortBy: nextSortBy,
         sortOrder: nextSortOrder,
         page: 1,
@@ -90,22 +98,23 @@ export function PropertyFeed() {
       setError(getErrorMessage(fetchError));
       setIsLoading(false);
     }
-  };
+  }
 
   useEffect(() => {
     const requestId = ++requestIdRef.current;
     void getProperties({
-      sortBy: DEFAULT_SORT.sortBy,
-      sortOrder: DEFAULT_SORT.sortOrder,
+      ...filters,
+      sortBy,
+      sortOrder,
       page: 1,
       limit: FEED_PAGE_LIMIT,
     })
-      .then((firstPage) => {
+      .then((result) => {
         if (requestId !== requestIdRef.current) return;
         setError(null);
-        setItems(firstPage.items);
-        setMeta(firstPage.meta);
-        setPage(firstPage.meta.page);
+        setItems(result.items);
+        setMeta(result.meta);
+        setPage(result.meta.page);
       })
       .catch((fetchError: unknown) => {
         if (requestId !== requestIdRef.current) return;
@@ -119,9 +128,9 @@ export function PropertyFeed() {
     return () => {
       requestIdRef.current += 1;
     };
-  }, []);
+  }, [filters, sortBy, sortOrder]);
 
-  const loadMore = async () => {
+const loadMore = async () => {
     if (isLoading) return;
     if (meta === null || page >= meta.totalPages) return;
 
@@ -130,6 +139,7 @@ export function PropertyFeed() {
     setIsLoading(true);
     try {
       const result = await getProperties({
+        ...filters,
         sortBy,
         sortOrder,
         page: nextPage,
@@ -150,17 +160,7 @@ export function PropertyFeed() {
 
   const retry = () => {
     setError(null);
-    setIsLoading(true);
-    void fetchFirstPage(sortBy, sortOrder);
-  };
-
-  const handleSortChange = (key: SortKey) => {
-    const next = parseSortKey(key);
-    setSortBy(next.sortBy);
-    setSortOrder(next.sortOrder);
-    setError(null);
-    setIsLoading(true);
-    void fetchFirstPage(next.sortBy, next.sortOrder);
+    void fetchFirstPage(filters, sortBy, sortOrder);
   };
 
   const sentinelRef = useIntersectionObserver(loadMore);
@@ -173,7 +173,9 @@ export function PropertyFeed() {
         <Select
           value={`${sortBy}_${sortOrder}`}
           onValueChange={(value) => {
-            if (value) handleSortChange(value as SortKey);
+            if (!value) return;
+            const next = parseSortKey(value as SortKey);
+            onSortChange(next.sortBy, next.sortOrder);
           }}
         >
           <SelectTrigger className="w-52">
@@ -217,6 +219,10 @@ export function PropertyFeed() {
             Спробувати ще раз
           </button>
         </div>
+      ) : items.length === 0 ? (
+        <p className="text-sm text-muted-foreground">
+          За заданими фільтрами оголошень не знайдено.
+        </p>
       ) : null}
 
       {hasMore ? <div ref={sentinelRef} className="h-4 w-full" /> : null}

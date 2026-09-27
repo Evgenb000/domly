@@ -1,0 +1,1 @@
+export { PropertyFeed } from "./ui/PropertyFeed";

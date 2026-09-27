@@ -10,6 +10,7 @@ import { BookingsModule } from './modules/bookings/bookings.module';
 import { FavoritesModule } from './modules/favorites/favorites.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { PropertiesModule } from './modules/properties/properties.module';
+import { LocationsModule } from './modules/locations/locations.module';
 import { AdminModule } from './modules/admin/admin.module';
 
 @Module({
@@ -24,6 +25,7 @@ import { AdminModule } from './modules/admin/admin.module';
     NotificationsModule,
     AuthModule,
     PropertiesModule,
+    LocationsModule,
     BookingsModule,
     FavoritesModule,
     AdminModule,
