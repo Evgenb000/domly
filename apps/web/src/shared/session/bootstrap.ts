@@ -13,5 +13,7 @@ export async function ensureSession(): Promise<void> {
     }
   } catch {
     // stay anonymous; refreshSession clears the store when rotation fails
+  } finally {
+    useSessionStore.getState().finishInitializing();
   }
 }
