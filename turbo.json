@@ -11,7 +11,7 @@
       "dependsOn": ["^db:generate", "db:generate"]
     },
     "build": {
-      "dependsOn": ["^db:generate", "db:generate"],
+      "dependsOn": ["^build", "^db:generate", "db:generate"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": [".next/**", "!.next/cache/**", "!.next/dev/**", "dist/**"]
     },

@@ -1,0 +1,44 @@
+# Render Blueprint for the domly API (NestJS) — free plan.
+# Secrets (sync: false) and dynamic URLs (sync: false) are prompted at first creation
+# and must be filled in the Render Dashboard before the service becomes healthy.
+services:
+  - type: web
+    name: domly-api
+    runtime: node
+    plan: free
+    region: frankfurt
+    healthCheckPath: /health
+    buildCommand: npm ci --include=dev && npx turbo run build --filter=api...
+    # Run schema migrations once per deploy (not on every instance start).
+    # Uses DIRECT_URL from the datasource directUrl block (non-pooled, Neon).
+    preDeployCommand: npx prisma migrate deploy --schema packages/database/prisma/schema.prisma
+    startCommand: node apps/api/dist/main.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: JWT_ACCESS_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: JWT_ACCESS_EXPIRY
+        value: 15m
+      - key: JWT_REFRESH_EXPIRY
+        value: 7d
+      - key: RESEND_FROM_EMAIL
+        value: noreply@domly.app
+      - key: DATABASE_URL
+        sync: false # Neon pooled URL with pgbouncer=true&connection_limit=1
+      - key: DIRECT_URL
+        sync: false # Neon direct URL (no -pooler) for migrations
+      - key: REDIS_URL
+        sync: false # Upstash rediss://default:<token>@<host>:<port>
+      - key: RESEND_API_KEY
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: FRONTEND_URL
+        sync: false # Production Vercel domain (CORS + OAuth redirects), e.g. https://domly.vercel.app
+      - key: GOOGLE_CALLBACK_URL
+        sync: false # e.g. https://<your-render-service>.onrender.com/auth/google/callback
