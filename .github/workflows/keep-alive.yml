@@ -1,0 +1,32 @@
+name: keep-alive
+
+on:
+  schedule:
+    # Every 10 minutes, wake the Render free web service so it does not spin down.
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+jobs:
+  ping:
+    name: Ping API health
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Render API health endpoint
+        env:
+          API_HEALTH_URL: ${{ secrets.API_HEALTH_URL }}
+        run: |
+          if [ -z "$API_HEALTH_URL" ]; then
+            echo "error: API_HEALTH_URL repository secret is not set"
+            exit 1
+          fi
+          echo "Pinging $API_HEALTH_URL"
+          for attempt in 1 2 3; do
+            if curl -fsS --max-time 60 "$API_HEALTH_URL"; then
+              echo "Health OK (attempt $attempt)"
+              exit 0
+            fi
+            echo "Attempt $attempt failed, retrying..."
+            sleep 5
+          done
+          echo "error: health endpoint unreachable after 3 attempts"
+          exit 1
