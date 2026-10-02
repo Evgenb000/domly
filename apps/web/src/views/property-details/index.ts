@@ -1,0 +1,1 @@
+export { PropertyDetailsView } from "./ui/PropertyDetailsView";
