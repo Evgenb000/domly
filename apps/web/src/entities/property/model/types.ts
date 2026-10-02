@@ -3,10 +3,13 @@ import type { PropertyResponseDto } from '@domly/shared';
 export type PropertyCategory = PropertyResponseDto['category'];
 export type PropertyDealType = PropertyResponseDto['dealType'];
 export type PropertyStatus = PropertyResponseDto['status'];
+export type PropertyOwnerRole = PropertyResponseDto['ownerRole'];
 
 export interface Property {
   id: string;
   ownerId: string;
+  ownerName: string;
+  ownerRole: PropertyOwnerRole;
   title: string;
   description: string;
   category: PropertyCategory;

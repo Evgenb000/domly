@@ -5,7 +5,10 @@ export const FAVORITES_REPOSITORY = Symbol('FAVORITES_REPOSITORY');
 export type FavoriteWithProperty = Prisma.FavoriteGetPayload<{
   include: {
     property: {
-      include: { district: { include: { city: true } } };
+      include: {
+        district: { include: { city: true } };
+        owner: true;
+      };
     };
   };
 }>;

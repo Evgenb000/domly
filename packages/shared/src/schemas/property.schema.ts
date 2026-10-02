@@ -113,6 +113,8 @@ export const PropertyResponseSchema = z.object({
   photos: z.array(z.string()),
   viewsCount: z.number(),
   ownerId: z.string(),
+  ownerName: z.string(),
+  ownerRole: z.enum(["USER", "REALTOR", "DEVELOPER", "ADMIN"]),
   districtId: z.string(),
   districtName: z.string(),
   cityName: z.string(),

@@ -5,6 +5,8 @@ export function toProperty(dto: PropertyResponseDto): Property {
   return {
     id: dto.id,
     ownerId: dto.ownerId,
+    ownerName: dto.ownerName,
+    ownerRole: dto.ownerRole,
     title: dto.title,
     description: dto.description,
     category: dto.category,

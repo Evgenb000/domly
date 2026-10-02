@@ -3,6 +3,7 @@ export type {
   PropertyCategory,
   PropertyDealType,
   PropertyStatus,
+  PropertyOwnerRole,
 } from './model/types';
 export { toProperty } from './model/mapper';
 export { getProperty } from './api/getProperty';
@@ -14,6 +15,7 @@ export {
   DEAL_TYPE_LABELS,
   PROPERTY_CATEGORY_LABELS,
   PROPERTY_STATUS_LABELS,
+  OWNER_ROLE_LABELS,
 } from './model/labels';
 export {
   PROPERTY_GALLERY_STRINGS,

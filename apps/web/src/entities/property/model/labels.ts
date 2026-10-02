@@ -21,3 +21,10 @@ export const PROPERTY_STATUS_LABELS: Record<"AVAILABLE" | "RESERVED", string> = 
   AVAILABLE: "Доступно",
   RESERVED: "Заброньовано",
 };
+
+export const OWNER_ROLE_LABELS: Record<"USER" | "REALTOR" | "DEVELOPER" | "ADMIN", string> = {
+  USER: "Користувач",
+  REALTOR: "Ріелтор",
+  DEVELOPER: "Забудовник",
+  ADMIN: "Адмін",
+};

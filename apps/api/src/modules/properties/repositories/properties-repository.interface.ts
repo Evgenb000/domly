@@ -6,7 +6,10 @@ import type {
 import { Prisma } from '@prisma/client';
 
 export type PropertyWithDistrict = Prisma.PropertyGetPayload<{
-  include: { district: { include: { city: true } } };
+  include: {
+    district: { include: { city: true } };
+    owner: true;
+  };
 }>;
 
 export interface PropertyCreateInput {

@@ -12,6 +12,7 @@ import {
   DEAL_TYPE_LABELS,
   PROPERTY_CATEGORY_LABELS,
   PROPERTY_STATUS_LABELS,
+  OWNER_ROLE_LABELS,
 } from "../model/labels";
 import { PROPERTY_DETAILS_STRINGS } from "../model/strings";
 
@@ -27,6 +28,9 @@ export function PropertyDetailsInfo({ property }: PropertyDetailsInfoProps) {
       <div className="flex flex-wrap gap-2">
         <Badge variant="outline">{DEAL_TYPE_LABELS[property.dealType]}</Badge>
         <Badge variant="outline">{PROPERTY_CATEGORY_LABELS[property.category]}</Badge>
+        {property.ownerRole === "REALTOR" || property.ownerRole === "DEVELOPER" ? (
+          <Badge variant="secondary">{OWNER_ROLE_LABELS[property.ownerRole]}</Badge>
+        ) : null}
         {property.status === "RESERVED" ? (
           <Badge variant="destructive">{PROPERTY_STATUS_LABELS[property.status]}</Badge>
         ) : null}

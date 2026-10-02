@@ -22,6 +22,8 @@ export function toPropertyResponse(property: PropertyWithDistrict): PropertyResp
     photos: property.photos,
     viewsCount: property.viewsCount,
     ownerId: property.ownerId,
+    ownerName: property.owner.name,
+    ownerRole: property.owner.role,
     districtId: property.districtId,
     districtName: property.district.name,
     cityName: property.district.city.name,
