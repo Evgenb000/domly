@@ -6,6 +6,7 @@ export type PropertyStatus = PropertyResponseDto['status'];
 
 export interface Property {
   id: string;
+  ownerId: string;
   title: string;
   description: string;
   category: PropertyCategory;

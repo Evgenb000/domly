@@ -16,3 +16,8 @@ export const PROPERTY_CATEGORY_LABELS: Record<
   ROOM: "Кімната",
   GARAGE: "Гараж",
 };
+
+export const PROPERTY_STATUS_LABELS: Record<"AVAILABLE" | "RESERVED", string> = {
+  AVAILABLE: "Доступно",
+  RESERVED: "Заброньовано",
+};

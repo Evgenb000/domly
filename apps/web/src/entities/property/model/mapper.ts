@@ -4,6 +4,7 @@ import type { Property } from './types';
 export function toProperty(dto: PropertyResponseDto): Property {
   return {
     id: dto.id,
+    ownerId: dto.ownerId,
     title: dto.title,
     description: dto.description,
     category: dto.category,
