@@ -5,7 +5,7 @@ export const BOOKINGS_REPOSITORY = Symbol('BOOKINGS_REPOSITORY');
 export type BookingWithPropertyAndOwner = Prisma.BookingGetPayload<{
   include: {
     property: {
-      include: { owner: true; district: { include: { city: true } } };
+      include: { owner: { select: { name: true, role: true, email: true } }; district: { include: { city: true } } };
     };
   };
 }>;
