@@ -5,7 +5,15 @@ import { NotificationsService } from './notifications.service';
 import { EmailProcessor } from './processors/email.processor';
 
 @Module({
-  imports: [BullModule.registerQueue({ name: 'emails' })],
+  imports: [
+    BullModule.registerQueue({
+      name: 'emails',
+      defaultJobOptions: {
+        attempts: 2,
+        backoff: { type: 'fixed', delay: 5000 },
+      },
+    }),
+  ],
   providers: [NotificationsService, EmailFactory, EmailProcessor],
   exports: [NotificationsService],
 })

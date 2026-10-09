@@ -19,7 +19,7 @@ services:
       - key: JWT_REFRESH_EXPIRY
         value: 7d
       - key: RESEND_FROM_EMAIL
-        value: noreply@domly.app
+        value: onboarding@resend.dev
       - key: DATABASE_URL
         sync: false
       - key: DIRECT_URL
