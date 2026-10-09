@@ -8,6 +8,9 @@ import { LocationsRepository } from './repositories/locations.repository';
 @Module({
   imports: [PrismaModule],
   controllers: [LocationsController],
-  providers: [{ provide: LOCATIONS_REPOSITORY, useClass: LocationsRepository }],
+  providers: [
+    LocationsService,
+    { provide: LOCATIONS_REPOSITORY, useClass: LocationsRepository },
+  ],
 })
 export class LocationsModule {}
