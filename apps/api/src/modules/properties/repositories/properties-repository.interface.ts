@@ -8,7 +8,7 @@ import { Prisma } from '@prisma/client';
 export type PropertyWithDistrict = Prisma.PropertyGetPayload<{
   include: {
     district: { include: { city: true } };
-    owner: { select: { name: true, role: true, email: true } };
+    owner: { select: { name: true, role: true } };
   };
 }>;
 

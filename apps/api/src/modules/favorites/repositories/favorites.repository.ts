@@ -22,7 +22,7 @@ export class FavoritesRepository implements IFavoritesRepository {
       },
       include: {
         property: {
-          include: { district: { include: { city: true } }, owner: { select: { name: true, role: true, email: true } } },
+          include: { district: { include: { city: true } }, owner: { select: { name: true, role: true } } },
         },
       },
     });
@@ -36,7 +36,7 @@ export class FavoritesRepository implements IFavoritesRepository {
       data: { userId, propertyId },
       include: {
         property: {
-          include: { district: { include: { city: true } }, owner: { select: { name: true, role: true, email: true } } },
+          include: { district: { include: { city: true } }, owner: { select: { name: true, role: true } } },
         },
       },
     });
@@ -57,7 +57,7 @@ export class FavoritesRepository implements IFavoritesRepository {
       orderBy: { createdAt: 'desc' },
       include: {
         property: {
-          include: { district: { include: { city: true } }, owner: { select: { name: true, role: true, email: true } } },
+          include: { district: { include: { city: true } }, owner: { select: { name: true, role: true } } },
         },
       },
     });

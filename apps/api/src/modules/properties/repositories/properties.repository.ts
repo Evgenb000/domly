@@ -37,7 +37,7 @@ export class PropertiesRepository implements IPropertiesRepository {
   async findById(id: string): Promise<PropertyWithDistrict | null> {
     return this.prisma.property.findUnique({
       where: { id },
-      include: { district: { include: { city: true } }, owner: { select: { name: true, role: true, email: true } } },
+      include: { district: { include: { city: true } }, owner: { select: { name: true, role: true } } },
     });
   }
 
@@ -50,7 +50,7 @@ export class PropertiesRepository implements IPropertiesRepository {
       },
       include: {
         district: { include: { city: true } },
-        owner: { select: { name: true, role: true, email: true } },
+        owner: { select: { name: true, role: true } },
       },
     });
   }
@@ -64,7 +64,7 @@ export class PropertiesRepository implements IPropertiesRepository {
       },
       include: {
         district: { include: { city: true } },
-        owner: { select: { name: true, role: true, email: true } },
+        owner: { select: { name: true, role: true } },
       },
     });
   }
@@ -97,7 +97,7 @@ export class PropertiesRepository implements IPropertiesRepository {
     return this.prisma.property.update({
       where: { id },
       data: { moderationStatus },
-      include: { district: { include: { city: true } }, owner: { select: { name: true, role: true, email: true } } },
+      include: { district: { include: { city: true } }, owner: { select: { name: true, role: true } } },
     });
   }
 
@@ -114,7 +114,7 @@ export class PropertiesRepository implements IPropertiesRepository {
         orderBy,
         skip,
         take: query.limit,
-        include: { district: { include: { city: true } }, owner: { select: { name: true, role: true, email: true } } },
+        include: { district: { include: { city: true } }, owner: { select: { name: true, role: true } } },
       }),
       this.prisma.property.count({ where }),
     ]);

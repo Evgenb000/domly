@@ -7,7 +7,7 @@ export type FavoriteWithProperty = Prisma.FavoriteGetPayload<{
     property: {
       include: {
         district: { include: { city: true } };
-        owner: { select: { name: true, role: true, email: true } };
+        owner: { select: { name: true, role: true } };
       };
     };
   };
