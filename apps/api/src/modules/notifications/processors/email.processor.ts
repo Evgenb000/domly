@@ -6,7 +6,7 @@ import { Resend } from 'resend';
 import { EmailFactory } from '../factories/email.factory';
 import type { EmailJobPayload } from '../types/email-job.types';
 
-@Processor('emails')
+@Processor('emails', { drainDelay: 30 })
 export class EmailProcessor extends WorkerHost {
   private readonly logger = new Logger(EmailProcessor.name);
   private readonly resend: Resend | null;

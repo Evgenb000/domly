@@ -6,7 +6,7 @@ import {
   BookingsService,
 } from '../bookings.service';
 
-@Processor('booking-auto-cancel')
+@Processor('booking-auto-cancel', { drainDelay: 30 })
 export class BookingAutoCancelProcessor extends WorkerHost {
   private readonly logger = new Logger(BookingAutoCancelProcessor.name);
 
