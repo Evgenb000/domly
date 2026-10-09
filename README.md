@@ -1,6 +1,14 @@
 # Turborepo starter
 
-This Turborepo starter is maintained by the Turborepo core team.
+> Проект **domly** — маркетплейс нерухомості. Backend: NestJS (монорепо в `apps/api`), frontend: Next.js (`apps/web`), общие схемы/типы: `packages/shared`, БД/Prisma: `packages/database`.
+
+## Демо-ограничения (важно для первого деплоя)
+
+- **Email-подтверждение (Resend).** Resend шлёт письма только с домена, привязанного и верифицированного к аккаунту. Без своего домена работает только тестовый отправитель `onboarding@resend.dev` — и то письма доходят **только на почту владельца аккаунта Resend**. Поэтому:
+  - либо верифицировать домен в Resend и выставить `RESEND_FROM_EMAIL=noreply@<ваш-домен>`;
+  - либо для демо оставить отправителя на свою почту (регистрация других юзеров письма не получит — демонстрировать верификацию на своём email).
+- **Redis (Upstash).** Обязательны те же параметры, что и локально: `REDIS_URL=rediss://default:<token>@<host>:<port>` (TLS).
+- База — Neon: `DATABASE_URL` с `pgbouncer=true&connection_limit=1` (runtime), `DIRECT_URL` без `-pooler` (миграции, из `directUrl` в Prisma-схеме).
 
 ## Using this example
 
