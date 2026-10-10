@@ -9,7 +9,6 @@ import {
   Role,
 } from "@prisma/client";
 import bcrypt from "bcryptjs";
-import { randomUUID } from "crypto";
 
 const prisma = new PrismaClient();
 
@@ -194,82 +193,6 @@ function photosFor(seedKey: string): string[] {
   );
 }
 
-async function clearDatabase(): Promise<void> {
-  await prisma.favorite.deleteMany();
-  await prisma.booking.deleteMany();
-  await prisma.property.deleteMany();
-  await prisma.district.deleteMany();
-  await prisma.city.deleteMany();
-  await prisma.user.deleteMany();
-}
-
-async function seedUsers(): Promise<{ userIds: string[] }> {
-  const passwordHash = await bcrypt.hash(FIXED_PASSWORD, 10);
-
-  await prisma.user.createMany({
-    data: [
-      {
-        email: "admin@domly.dev",
-        passwordHash,
-        role: "ADMIN",
-        emailVerified: true,
-      },
-      {
-        email: "realtor@domly.dev",
-        passwordHash,
-        role: "REALTOR",
-        emailVerified: true,
-      },
-      {
-        email: "developer@domly.dev",
-        passwordHash,
-        role: "DEVELOPER",
-        emailVerified: true,
-      },
-      {
-        email: "user@domly.dev",
-        passwordHash,
-        role: "USER",
-        emailVerified: true,
-      },
-    ],
-  });
-
-  const randomUserCount = 116;
-  const seenEmails = new Set<string>();
-  const randomUsersData: {
-    email: string;
-    passwordHash: string;
-    role: Role;
-    emailVerified: boolean;
-    isBlocked: boolean;
-  }[] = [];
-
-  while (randomUsersData.length < randomUserCount) {
-    const email = faker.internet.email().toLowerCase();
-    if (seenEmails.has(email)) continue;
-    seenEmails.add(email);
-
-    const role = weightedPick(ROLE_WEIGHTS);
-    const isSelfServiceRole = role === "REALTOR" || role === "DEVELOPER";
-
-    randomUsersData.push({
-      email,
-      passwordHash,
-      role,
-      emailVerified: isSelfServiceRole
-        ? true
-        : faker.datatype.boolean({ probability: 0.85 }),
-      isBlocked: faker.datatype.boolean({ probability: 0.04 }),
-    });
-  }
-
-  await prisma.user.createMany({ data: randomUsersData, skipDuplicates: true });
-
-  const allUsers = await prisma.user.findMany({ select: { id: true } });
-  return { userIds: allUsers.map((u) => u.id) };
-}
-
 type CityWithDistricts = {
   cityName: string;
   propertiesCount: number;
@@ -278,23 +201,94 @@ type CityWithDistricts = {
   districts: { id: string; name: string }[];
 };
 
+const FIXED_USERS: { email: string; role: Role }[] = [
+  { email: "admin@domly.dev", role: "ADMIN" },
+  { email: "realtor@domly.dev", role: "REALTOR" },
+  { email: "developer@domly.dev", role: "DEVELOPER" },
+  { email: "user@domly.dev", role: "USER" },
+];
+
+async function seedUsers(): Promise<{ userIds: string[] }> {
+  const passwordHash = await bcrypt.hash(FIXED_PASSWORD, 10);
+
+  for (const user of FIXED_USERS) {
+    await prisma.user.upsert({
+      where: { email: user.email },
+      update: {},
+      create: {
+        email: user.email,
+        passwordHash,
+        role: user.role,
+        emailVerified: true,
+      },
+    });
+  }
+
+  const randomUserCount = 116;
+
+  for (let i = 1; i <= randomUserCount; i++) {
+    const email = `seed-user-${String(i).padStart(3, "0")}@seed.domly.dev`;
+    const role = weightedPick(ROLE_WEIGHTS);
+    const isSelfServiceRole = role === "REALTOR" || role === "DEVELOPER";
+
+    await prisma.user.upsert({
+      where: { email },
+      update: {},
+      create: {
+        email,
+        passwordHash,
+        name: faker.person.fullName(),
+        role,
+        emailVerified: isSelfServiceRole
+          ? true
+          : faker.datatype.boolean({ probability: 0.85 }),
+        isBlocked: faker.datatype.boolean({ probability: 0.04 }),
+      },
+    });
+  }
+
+  const seedOwnerEmails = [
+    ...FIXED_USERS.map((u) => u.email),
+    ...Array.from(
+      { length: randomUserCount },
+      (_, i) => `seed-user-${String(i + 1).padStart(3, "0")}@seed.domly.dev`,
+    ),
+  ];
+
+  const seedUsers = await prisma.user.findMany({
+    where: { email: { in: seedOwnerEmails } },
+    select: { id: true },
+  });
+
+  return { userIds: seedUsers.map((u) => u.id) };
+}
+
 async function seedCitiesAndDistricts(): Promise<CityWithDistricts[]> {
   const result: CityWithDistricts[] = [];
 
   for (const cityDef of CITIES) {
-    const city = await prisma.city.create({ data: { name: cityDef.name } });
-    const districts = await Promise.all(
-      cityDef.districts.map((name) =>
-        prisma.district.create({ data: { name, cityId: city.id } }),
-      ),
-    );
+    const city = await prisma.city.upsert({
+      where: { name: cityDef.name },
+      update: {},
+      create: { name: cityDef.name },
+    });
+
+    const districts: { id: string; name: string }[] = [];
+    for (const name of cityDef.districts) {
+      const district = await prisma.district.upsert({
+        where: { cityId_name: { cityId: city.id, name } },
+        update: {},
+        create: { name, cityId: city.id },
+      });
+      districts.push({ id: district.id, name: district.name });
+    }
 
     result.push({
       cityName: cityDef.name,
       propertiesCount: cityDef.propertiesCount,
       lat: cityDef.lat,
       lng: cityDef.lng,
-      districts: districts.map((d) => ({ id: d.id, name: d.name })),
+      districts,
     });
   }
 
@@ -302,7 +296,6 @@ async function seedCitiesAndDistricts(): Promise<CityWithDistricts[]> {
 }
 
 type PropertySeedRow = {
-  id: string;
   title: string;
   description: string;
   category: PropertyCategory;
@@ -336,7 +329,6 @@ async function seedProperties(
       const category = weightedPick(CATEGORY_WEIGHTS);
       const dealType = weightedPick(DEAL_TYPE_WEIGHTS);
       const area = areaForCategory(category);
-      const id = randomUUID();
 
       let price: number | null = null;
       let pricePerNight: number | null = null;
@@ -357,8 +349,9 @@ async function seedProperties(
       const effectivePrice =
         dealType === "DAILY_RENT" ? pricePerNight! : price!;
 
+      const photoSeed = `${city.cityName}-${district.name}-${i}`;
+
       propertiesData.push({
-        id,
         title: titleFor(category, area, district.name),
         description: randomDescription(),
         category,
@@ -374,7 +367,7 @@ async function seedProperties(
         address: randomAddress(),
         latitude: jitterCoordinate(city.lat),
         longitude: jitterCoordinate(city.lng),
-        photos: photosFor(id),
+        photos: photosFor(photoSeed),
         viewsCount: faker.number.int({ min: 0, max: 480 }),
         ownerId: faker.helpers.arrayElement(ownerIds),
         districtId: district.id,
@@ -383,7 +376,11 @@ async function seedProperties(
   }
 
   await prisma.property.createMany({ data: propertiesData });
-  return propertiesData.map((p) => p.id);
+  const created = await prisma.property.findMany({
+    where: { ownerId: { in: ownerIds } },
+    select: { id: true },
+  });
+  return created.map((p) => p.id);
 }
 
 async function seedBookings(
@@ -457,15 +454,30 @@ async function seedFavorites(
   });
 }
 
+async function deleteSeedProperties(): Promise<void> {
+  const deleted = await prisma.property.deleteMany({
+    where: {
+      OR: [
+        { owner: { email: { endsWith: "@domly.dev" } } },
+        { owner: { email: { endsWith: "@seed.domly.dev" } } },
+      ],
+    },
+  });
+  console.log(`Видалено попередніх сід-об'яв: ${deleted.count}`);
+}
+
 async function main(): Promise<void> {
-  console.log("Очищення бази даних...");
-  await clearDatabase();
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("Seed is not allowed when NODE_ENV=production");
+  }
 
   console.log("Сідінг юзерів...");
   const { userIds } = await seedUsers();
 
   console.log("Сідінг міст та районів...");
   const cities = await seedCitiesAndDistricts();
+
+  await deleteSeedProperties();
 
   console.log("Сідінг об'яв...");
   const propertyIds = await seedProperties(cities, userIds);
@@ -483,7 +495,7 @@ async function main(): Promise<void> {
     `  Районів: ${cities.reduce((sum, c) => sum + c.districts.length, 0)}`,
   );
   console.log(
-    `  Юзерів: ${userIds.length} (+ 4 фіксовані: admin/realtor/developer/user@domly.dev, пароль "${FIXED_PASSWORD}")`,
+    `  Юзерів: ${userIds.length} (фіксовані: admin/realtor/developer/user@domly.dev + seed-user-NNN@seed.domly.dev, пароль "${FIXED_PASSWORD}")`,
   );
   console.log(`  Об'яв: ${propertyIds.length}`);
 }
