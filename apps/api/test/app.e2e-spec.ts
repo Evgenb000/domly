@@ -1,12 +1,5 @@
 import { authUserSchema } from '@domly/shared';
-import {
-  afterAll,
-  beforeAll,
-  describe,
-  expect,
-  it,
-  jest,
-} from '@jest/globals';
+import { afterAll, beforeAll, describe, expect, it, jest } from '@jest/globals';
 import { INestApplication } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
@@ -161,9 +154,8 @@ describe('Auth (e2e)', () => {
     it('токен с невалидным payload — 401, не 500', async () => {
       const jwtService = app.get(JwtService);
       const configService = app.get(ConfigService);
-      const accessSecret = configService.getOrThrow<string>(
-        'JWT_ACCESS_SECRET',
-      );
+      const accessSecret =
+        configService.getOrThrow<string>('JWT_ACCESS_SECRET');
       const tokenWithoutSub = await jwtService.signAsync(
         { role: 'USER' },
         { secret: accessSecret },
@@ -177,4 +169,3 @@ describe('Auth (e2e)', () => {
     });
   });
 });
-

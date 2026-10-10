@@ -102,9 +102,7 @@ export class AuthController {
   @Post('resend-verification')
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAccessGuard)
-  async resendVerification(
-    @CurrentUser() currentUser: CurrentUserPayload,
-  ) {
+  async resendVerification(@CurrentUser() currentUser: CurrentUserPayload) {
     await this.authService.resendVerification(currentUser.id);
     return { message: 'Verification email sent' };
   }

@@ -415,9 +415,21 @@ describe('Properties (e2e)', () => {
       const sameCreatedAt = new Date('2020-01-01T00:00:00.000Z');
       const tiePrice = 777777;
       const seeded = [
-        await seedProperty({ createdAt: sameCreatedAt, price: tiePrice, effectivePrice: tiePrice }),
-        await seedProperty({ createdAt: sameCreatedAt, price: tiePrice, effectivePrice: tiePrice }),
-        await seedProperty({ createdAt: sameCreatedAt, price: tiePrice, effectivePrice: tiePrice }),
+        await seedProperty({
+          createdAt: sameCreatedAt,
+          price: tiePrice,
+          effectivePrice: tiePrice,
+        }),
+        await seedProperty({
+          createdAt: sameCreatedAt,
+          price: tiePrice,
+          effectivePrice: tiePrice,
+        }),
+        await seedProperty({
+          createdAt: sameCreatedAt,
+          price: tiePrice,
+          effectivePrice: tiePrice,
+        }),
       ];
       const seededIds = seeded.map((property) => property.id);
 
@@ -429,7 +441,13 @@ describe('Properties (e2e)', () => {
         for (let page = 1; page <= 3; page++) {
           const res = await request(app.getHttpServer())
             .get('/properties')
-            .query({ ...sort, priceMin: tiePrice, priceMax: tiePrice, limit: 1, page })
+            .query({
+              ...sort,
+              priceMin: tiePrice,
+              priceMax: tiePrice,
+              limit: 1,
+              page,
+            })
             .set('Authorization', `Bearer ${bookerToken}`)
             .expect(200);
 
