@@ -146,7 +146,10 @@ const loadMore = async () => {
         limit: FEED_PAGE_LIMIT,
       });
       if (requestId !== requestIdRef.current) return;
-      setItems((prev) => [...prev, ...result.items]);
+      setItems((prev) => {
+        const seen = new Set(prev.map((item) => item.id));
+        return [...prev, ...result.items.filter((item) => !seen.has(item.id))];
+      });
       setMeta(result.meta);
       setPage(nextPage);
       setError(null);
