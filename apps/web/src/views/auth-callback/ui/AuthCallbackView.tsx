@@ -6,6 +6,8 @@ import Link from "next/link";
 import { exchangeOAuthCode } from "@/entities/session";
 import { getMe } from "@/shared/session/me";
 import { useSessionStore } from "@/shared/session/store";
+import { ApiError } from "@/shared/api/types";
+import { AUTH_CALLBACK_STRINGS } from "../model/strings";
 
 export function AuthCallbackView() {
   const router = useRouter();
@@ -13,7 +15,7 @@ export function AuthCallbackView() {
   const code = searchParams.get("code");
 
   const [error, setError] = useState<string | null>(() =>
-    code ? null : "Посилання недійсне",
+    code ? null : AUTH_CALLBACK_STRINGS.invalidLink,
   );
   const startedRef = useRef(false);
 
@@ -25,15 +27,41 @@ export function AuthCallbackView() {
     const authCode = code;
 
     async function handleAuth() {
+      let accessToken: string;
       try {
-        const accessToken = await exchangeOAuthCode(authCode);
-        useSessionStore.getState().setSession(accessToken, null);
+        accessToken = await exchangeOAuthCode(authCode);
+      } catch (err) {
+        handleError(err, "exchange");
+        return;
+      }
+
+      useSessionStore.getState().setSession(accessToken, null);
+
+      try {
         const user = await getMe();
         useSessionStore.getState().setSession(accessToken, user);
         router.push("/");
-      } catch {
-        setError("Спробуйте увійти ще раз: посилання застаріло");
+      } catch (err) {
+        handleError(err, "getMe");
       }
+    }
+
+    function handleError(err: unknown, stage: "exchange" | "getMe") {
+      if (useSessionStore.getState().user) {
+        router.replace("/");
+        return;
+      }
+
+      if (
+        stage === "exchange" &&
+        err instanceof ApiError &&
+        (err.statusCode === 400 || err.statusCode === 401)
+      ) {
+        setError(AUTH_CALLBACK_STRINGS.linkExpired);
+        return;
+      }
+
+      setError(AUTH_CALLBACK_STRINGS.loginFailed);
     }
 
     void handleAuth();
@@ -48,11 +76,13 @@ export function AuthCallbackView() {
             href="/login"
             className="text-sm text-primary underline-offset-4 hover:underline"
           >
-            На сторінку входу
+            {AUTH_CALLBACK_STRINGS.backToLogin}
           </Link>
         </>
       ) : (
-        <p className="text-sm text-muted-foreground">Вхід через Google...</p>
+        <p className="text-sm text-muted-foreground">
+          {AUTH_CALLBACK_STRINGS.loading}
+        </p>
       )}
     </div>
   );
