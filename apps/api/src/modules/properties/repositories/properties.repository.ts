@@ -152,8 +152,8 @@ export class PropertiesRepository implements IPropertiesRepository {
 
   private buildOrderBy(
     query: PropertyQueryDto,
-  ): Prisma.PropertyOrderByWithRelationInput {
+  ): Prisma.PropertyOrderByWithRelationInput[] {
     const field = query.sortBy === 'price' ? 'effectivePrice' : 'createdAt';
-    return { [field]: query.sortOrder };
+    return [{ [field]: query.sortOrder }, { id: 'asc' }];
   }
 }
