@@ -31,8 +31,8 @@ import { RefreshCookieClearFilter } from './filters/refresh-cookie-clear.filter'
 import { JwtAccessGuard } from './guards/jwt-access.guard';
 import { JwtRefreshGuard } from './guards/jwt-refresh.guard';
 import type { GoogleProfile } from './strategies/google.strategy';
-import type { JwtAccessPayload } from './strategies/jwt-access.strategy';
 import type { JwtRefreshPayload } from './strategies/jwt-refresh.strategy';
+import type { CurrentUserPayload } from './types/current-user.type';
 
 @Controller('auth')
 export class AuthController {
@@ -102,15 +102,17 @@ export class AuthController {
   @Post('resend-verification')
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAccessGuard)
-  async resendVerification(@CurrentUser() payload: JwtAccessPayload) {
-    await this.authService.resendVerification(payload.sub);
+  async resendVerification(
+    @CurrentUser() currentUser: CurrentUserPayload,
+  ) {
+    await this.authService.resendVerification(currentUser.id);
     return { message: 'Verification email sent' };
   }
 
   @Get('me')
   @UseGuards(JwtAccessGuard)
-  async me(@CurrentUser() payload: JwtAccessPayload) {
-    return this.authService.getCurrentUser(payload.sub);
+  async me(@CurrentUser() currentUser: CurrentUserPayload) {
+    return this.authService.getCurrentUser(currentUser.id);
   }
 
   @Get('google')
