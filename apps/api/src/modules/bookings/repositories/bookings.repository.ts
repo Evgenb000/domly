@@ -6,11 +6,21 @@ import type {
   BookingWithPropertyAndOwner,
   IBookingsRepository,
   PaginatedBookings,
+  PropertyBookingPreconditions,
 } from './bookings-repository.interface';
 
 @Injectable()
 export class BookingsRepository implements IBookingsRepository {
   constructor(private readonly prisma: PrismaService) {}
+
+  async findPropertyForBooking(
+    propertyId: string,
+  ): Promise<PropertyBookingPreconditions | null> {
+    return this.prisma.property.findUnique({
+      where: { id: propertyId },
+      select: { id: true, ownerId: true, status: true },
+    });
+  }
 
   async createWithPropertyLock(
     propertyId: string,

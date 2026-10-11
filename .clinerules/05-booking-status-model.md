@@ -48,11 +48,42 @@ Booking:  (создание) ──> ACTIVE ──(ручная отмена)─
 объект в `AVAILABLE`. Разница только в том, кто/что инициировало возврат — это нужно для истории
 и для аналитики (воронка "брони: сколько отменено вручную vs сколько истекло само").
 
+## Предусловия POST /bookings
+
+Перед любой работой с транзакцией `BookingsService.create` проверяет три условия. Все три
+проверяются **до** открытия транзакции: если хоть одна не пройдена — бронь не создаётся, событие
+`booking.created` не эмитится, очередь email и BullMQ delayed job не трогаются.
+
+1. **Гейт по подтверждённой почте.** Создание брони разрешено только при `emailVerified === true`.
+   Иначе — `ForbiddenException` (403) с сообщением `Email must be verified to create a booking`.
+   `emailVerified` читается из БД через `UsersRepository` (метод `UsersService.ensureEmailVerified`),
+   а не из JWT payload: значение в токене может быть устаревшим. GRASP Information Expert — статус
+   верификации знает `UsersService`, поэтому проверка живёт там, контроллер остаётся тонким.
+2. **Владелец не может забронировать собственный объект.** Если `property.ownerId === userId` —
+   `ForbiddenException` (403) с сообщением `You cannot book your own listing`.
+3. **Объект должен существовать.** Если объекта с таким `propertyId` нет — `NotFoundException`
+   (404) `Property not found`.
+
+Порядок проверок в `BookingsService.create`:
+
+```
+(a) ensureEmailVerified(userId)                  -> 403, чтение объекта не выполняется
+(b) findPropertyForBooking(propertyId) === null  -> 404
+(c) property.ownerId === userId                  -> 403
+(d) $transaction: UPDATE ... WHERE status = 'AVAILABLE', updatedCount === 0 -> 409
+```
+
+Из этого следует: 409 остаётся **только** за уже `RESERVED` (или удалённый между чтением и
+`UPDATE`) объект — несуществующий `propertyId` теперь отдаёт 404, а не 409.
+
 ## Действия (API)
 
 ### `POST /bookings`
 
 Вход: `propertyId`.
+
+Предусловия (гейт `emailVerified`, запрет self-booking, существование объекта) — в разделе
+«Предусловия POST /bookings» выше и выполняются раньше описанной ниже логики.
 
 Логика (в `BookingsService`, Information Expert — именно этот сервис владеет правилами
 бронирования):

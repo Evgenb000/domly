@@ -11,6 +11,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import { UsersService } from '../users/users.service';
 import type { CurrentUserPayload } from '../auth/types/current-user.type';
 import { RedisService } from '../../infrastructure/redis/redis.service';
 import { EffectivePricingService } from './pricing/effective-pricing.service';
@@ -39,6 +40,7 @@ export class PropertiesService {
     private readonly propertiesRepository: IPropertiesRepository,
     private readonly effectivePricingService: EffectivePricingService,
     private readonly redisService: RedisService,
+    private readonly usersService: UsersService,
   ) {}
 
   async findMany(
@@ -108,6 +110,11 @@ export class PropertiesService {
     dto: CreatePropertyDto,
     ownerId: string,
   ): Promise<PropertyWithDistrict> {
+    await this.usersService.ensureEmailVerified(
+      ownerId,
+      'Email must be verified to create a listing',
+    );
+
     const effectivePrice = this.effectivePricingService.calculate(dto);
     return this.propertiesRepository.create({
       data: dto,
