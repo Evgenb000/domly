@@ -213,10 +213,17 @@ export class AuthService {
       if (existingByEmail.isBlocked) {
         throw new ForbiddenException('Account is blocked');
       }
-      await this.usersRepository.linkGoogleAccount(
-        existingByEmail.id,
-        profile.googleId,
-      );
+      if (existingByEmail.emailVerified) {
+        await this.usersRepository.linkGoogleAccount(
+          existingByEmail.id,
+          profile.googleId,
+        );
+      } else {
+        await this.usersRepository.linkGoogleAccountResettingCredentials(
+          existingByEmail.id,
+          profile.googleId,
+        );
+      }
       return existingByEmail;
     }
 
