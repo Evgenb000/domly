@@ -103,6 +103,7 @@ describe('Auth (e2e)', () => {
         googleId: `e2e-google-${UNIQUE}`,
         email,
         name: 'E2E OAuth User',
+        emailVerified: true,
       });
 
       const exchangeRes = await request(app.getHttpServer())
@@ -166,6 +167,61 @@ describe('Auth (e2e)', () => {
         .set('Authorization', `Bearer ${tokenWithoutSub}`);
 
       expect(res.status).toBe(401);
+    });
+  });
+
+  describe('Google OAuth linking to an unverified password account', () => {
+    it('resets credentials and revokes refresh tokens on link', async () => {
+      const email = `e2e-auth-unverified-${UNIQUE}@test.local`;
+      const passwordHash = await hashValue(FIXED_PASSWORD);
+      const user = await prisma.user.create({
+        data: {
+          email,
+          name: 'E2E Unverified User',
+          passwordHash,
+          emailVerified: false,
+          emailVerificationToken: 'unverified-token',
+          emailVerificationExpiresAt: new Date(Date.now() + 3600_000),
+        },
+      });
+      createdUserIds.push(user.id);
+
+      const seededToken = await prisma.refreshToken.create({
+        data: {
+          userId: user.id,
+          tokenHash: 'unverified-active-token-hash',
+          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60_000),
+        },
+      });
+
+      const googleId = `e2e-google-unverified-${UNIQUE}`;
+      const { code } = await authService.handleGoogleCallback({
+        googleId,
+        email,
+        name: 'E2E Unverified User',
+        emailVerified: true,
+      });
+
+      expect(code).toBeTruthy();
+
+      const linked = await prisma.user.findUnique({ where: { email } });
+      expect(linked).not.toBeNull();
+      expect(linked?.googleId).toBe(googleId);
+      expect(linked?.emailVerified).toBe(true);
+      expect(linked?.passwordHash).toBeNull();
+
+      const revokedSeededToken = await prisma.refreshToken.findUnique({
+        where: { id: seededToken.id },
+      });
+      expect(revokedSeededToken?.revokedAt).not.toBeNull();
+
+      const otherTokens = await prisma.refreshToken.findMany({
+        where: { userId: user.id, id: { not: seededToken.id } },
+      });
+      expect(otherTokens.length).toBeGreaterThan(0);
+      for (const token of otherTokens) {
+        expect(token.revokedAt).toBeNull();
+      }
     });
   });
 });

@@ -30,8 +30,10 @@ describe('Bookings (e2e)', () => {
 
   let ownerToken: string;
   let bookerToken: string;
+  let booker2Token: string;
   let ownerId: string;
   let bookerId: string;
+  let booker2Id: string;
   let propertyId: string;
 
   async function createActiveBooking(userId: string) {
@@ -82,8 +84,18 @@ describe('Bookings (e2e)', () => {
       },
     });
 
+    const booker2 = await prisma.user.create({
+      data: {
+        email: `e2e-booker-2-${suffix}@test.local`,
+        name: 'E2E Booker 2',
+        passwordHash,
+        emailVerified: true,
+      },
+    });
+
     ownerId = owner.id;
     bookerId = booker.id;
+    booker2Id = booker2.id;
 
     let district = await prisma.district.findFirst({
       include: { city: true },
@@ -135,6 +147,10 @@ describe('Bookings (e2e)', () => {
       { sub: booker.id, role: booker.role },
       { secret: accessSecret },
     );
+    booker2Token = await jwtService.signAsync(
+      { sub: booker2.id, role: booker2.role },
+      { secret: accessSecret },
+    );
   });
 
   afterEach(async () => {
@@ -149,7 +165,7 @@ describe('Bookings (e2e)', () => {
     await prisma.booking.deleteMany({ where: { propertyId } });
     await prisma.property.delete({ where: { id: propertyId } });
     await prisma.user.deleteMany({
-      where: { id: { in: [ownerId, bookerId] } },
+      where: { id: { in: [ownerId, bookerId, booker2Id] } },
     });
 
     try {
@@ -222,7 +238,7 @@ describe('Bookings (e2e)', () => {
 
       await request(app.getHttpServer())
         .post('/bookings')
-        .set('Authorization', `Bearer ${ownerToken}`)
+        .set('Authorization', `Bearer ${booker2Token}`)
         .send({ propertyId })
         .expect(409);
     });
@@ -231,11 +247,11 @@ describe('Bookings (e2e)', () => {
       const results = await Promise.allSettled([
         request(app.getHttpServer())
           .post('/bookings')
-          .set('Authorization', `Bearer ${ownerToken}`)
+          .set('Authorization', `Bearer ${bookerToken}`)
           .send({ propertyId }),
         request(app.getHttpServer())
           .post('/bookings')
-          .set('Authorization', `Bearer ${bookerToken}`)
+          .set('Authorization', `Bearer ${booker2Token}`)
           .send({ propertyId }),
       ]);
 
@@ -250,6 +266,77 @@ describe('Bookings (e2e)', () => {
         where: { propertyId, status: 'ACTIVE' },
       });
       expect(activeBookings).toBe(1);
+    });
+
+    it('владелец не может забронировать собственный объект — 403', async () => {
+      const res = await request(app.getHttpServer())
+        .post('/bookings')
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .send({ propertyId })
+        .expect(403);
+
+      expect(res.body.message).toBe('You cannot book your own listing');
+
+      const property = await prisma.property.findUnique({
+        where: { id: propertyId },
+      });
+      expect(property?.status).toBe('AVAILABLE');
+
+      const bookings = await prisma.booking.count({ where: { propertyId } });
+      expect(bookings).toBe(0);
+    });
+
+    it('неверифицированный пользователь получает 403', async () => {
+      const passwordHash = await hashValue(FIXED_PASSWORD);
+      const unverified = await prisma.user.create({
+        data: {
+          email: `e2e-unverified-${Date.now()}@test.local`,
+          name: 'E2E Unverified',
+          passwordHash,
+          emailVerified: false,
+        },
+      });
+
+      try {
+        const jwtService = app.get(JwtService);
+        const configService = app.get(ConfigService);
+        const accessSecret =
+          configService.getOrThrow<string>('JWT_ACCESS_SECRET');
+        const unverifiedToken = await jwtService.signAsync(
+          { sub: unverified.id, role: unverified.role },
+          { secret: accessSecret },
+        );
+
+        const res = await request(app.getHttpServer())
+          .post('/bookings')
+          .set('Authorization', `Bearer ${unverifiedToken}`)
+          .send({ propertyId })
+          .expect(403);
+
+        expect(res.body.message).toBe(
+          'Email must be verified to create a booking',
+        );
+
+        const property = await prisma.property.findUnique({
+          where: { id: propertyId },
+        });
+        expect(property?.status).toBe('AVAILABLE');
+
+        const bookings = await prisma.booking.count({ where: { propertyId } });
+        expect(bookings).toBe(0);
+      } finally {
+        await prisma.user.delete({ where: { id: unverified.id } });
+      }
+    });
+
+    it('несуществующий propertyId — 404', async () => {
+      const res = await request(app.getHttpServer())
+        .post('/bookings')
+        .set('Authorization', `Bearer ${bookerToken}`)
+        .send({ propertyId: 'clx0000000000000000000000' })
+        .expect(404);
+
+      expect(res.body.message).toBe('Property not found');
     });
   });
 

@@ -1,6 +1,7 @@
 import { InjectQueue } from '@nestjs/bullmq';
 import {
   ConflictException,
+  ForbiddenException,
   Inject,
   Injectable,
   Logger,
@@ -8,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import type { Queue } from 'bullmq';
+import { UsersService } from '../users/users.service';
 import {
   BOOKINGS_REPOSITORY,
   BookingFilters,
@@ -30,12 +32,29 @@ export class BookingsService {
     private readonly eventEmitter: EventEmitter2,
     @InjectQueue('booking-auto-cancel')
     private readonly autoCancelQueue: Queue<BookingAutoCancelJobPayload>,
+    private readonly usersService: UsersService,
   ) {}
 
   async create(
     propertyId: string,
     userId: string,
   ): Promise<BookingWithPropertyAndOwner> {
+    await this.usersService.ensureEmailVerified(
+      userId,
+      'Email must be verified to create a booking',
+    );
+
+    const property =
+      await this.bookingsRepository.findPropertyForBooking(propertyId);
+
+    if (!property) {
+      throw new NotFoundException('Property not found');
+    }
+
+    if (property.ownerId === userId) {
+      throw new ForbiddenException('You cannot book your own listing');
+    }
+
     const booking = await this.bookingsRepository.createWithPropertyLock(
       propertyId,
       userId,

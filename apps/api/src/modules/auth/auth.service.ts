@@ -188,6 +188,12 @@ export class AuthService {
   }
 
   async validateOAuthLogin(profile: GoogleProfile) {
+    if (!profile.emailVerified) {
+      throw new ForbiddenException(
+        'Google account email is not verified by Google',
+      );
+    }
+
     const existingByGoogleId = await this.usersRepository.findByGoogleId(
       profile.googleId,
     );
@@ -207,10 +213,17 @@ export class AuthService {
       if (existingByEmail.isBlocked) {
         throw new ForbiddenException('Account is blocked');
       }
-      await this.usersRepository.linkGoogleAccount(
-        existingByEmail.id,
-        profile.googleId,
-      );
+      if (existingByEmail.emailVerified) {
+        await this.usersRepository.linkGoogleAccount(
+          existingByEmail.id,
+          profile.googleId,
+        );
+      } else {
+        await this.usersRepository.linkGoogleAccountResettingCredentials(
+          existingByEmail.id,
+          profile.googleId,
+        );
+      }
       return existingByEmail;
     }
 

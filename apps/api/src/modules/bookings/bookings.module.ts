@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { BullMqInfrastructureModule } from '../../infrastructure/bullmq/bullmq.module';
 import { NotificationsModule } from '../notifications/notifications.module';
+import { UsersModule } from '../users/users.module';
 import { BookingsController } from './bookings.controller';
 import { BookingsService } from './bookings.service';
 import { BookingCreatedListener } from './listeners/booking-created.listener';
@@ -9,7 +10,7 @@ import { BOOKINGS_REPOSITORY } from './repositories/bookings-repository.interfac
 import { BookingsRepository } from './repositories/bookings.repository';
 
 @Module({
-  imports: [BullMqInfrastructureModule, NotificationsModule],
+  imports: [BullMqInfrastructureModule, NotificationsModule, UsersModule],
   controllers: [BookingsController],
   providers: [
     BookingsService,

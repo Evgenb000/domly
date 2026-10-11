@@ -39,6 +39,8 @@ export class UsersRepository implements IUsersRepository {
         googleId: data.googleId,
         name: data.name,
         emailVerified: true,
+        emailVerificationToken: null,
+        emailVerificationExpiresAt: null,
       },
     });
   }
@@ -49,8 +51,32 @@ export class UsersRepository implements IUsersRepository {
       data: {
         googleId,
         emailVerified: true,
+        emailVerificationToken: null,
+        emailVerificationExpiresAt: null,
       },
     });
+  }
+
+  async linkGoogleAccountResettingCredentials(
+    userId: string,
+    googleId: string,
+  ): Promise<void> {
+    await this.prisma.$transaction([
+      this.prisma.user.update({
+        where: { id: userId },
+        data: {
+          googleId,
+          emailVerified: true,
+          emailVerificationToken: null,
+          emailVerificationExpiresAt: null,
+          passwordHash: null,
+        },
+      }),
+      this.prisma.refreshToken.updateMany({
+        where: { userId, revokedAt: null },
+        data: { revokedAt: new Date() },
+      }),
+    ]);
   }
 
   async findMany(

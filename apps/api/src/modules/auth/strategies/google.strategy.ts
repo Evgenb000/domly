@@ -7,6 +7,7 @@ export interface GoogleProfile {
   googleId: string;
   email: string;
   name: string;
+  emailVerified: boolean;
 }
 
 @Injectable()
@@ -24,11 +25,14 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     _accessToken: string,
     _refreshToken: string,
     profile: Profile,
-    done: (error: any, user?: any) => void,
+    done: (error: Error | null, user?: GoogleProfile) => void,
   ): void {
     const googleId = profile.id;
     const email = profile.emails?.[0]?.value ?? '';
     const name = profile.displayName ?? '';
-    done(null, { googleId, email, name });
+    const emailVerified =
+      profile.emails?.[0]?.verified === true ||
+      profile._json?.email_verified === true;
+    done(null, { googleId, email, name, emailVerified });
   }
 }

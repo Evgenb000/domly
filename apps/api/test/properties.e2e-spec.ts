@@ -262,6 +262,46 @@ describe('Properties (e2e)', () => {
         .send(salePayload())
         .expect(401);
     });
+
+    it('неверифицированный пользователь — 403, объявление не создаётся', async () => {
+      const passwordHash = await hashValue(FIXED_PASSWORD);
+      const unverified = await prisma.user.create({
+        data: {
+          email: `e2e-prop-unverified-${Date.now()}@test.local`,
+          name: 'E2E Property Unverified',
+          passwordHash,
+          emailVerified: false,
+        },
+      });
+
+      try {
+        const jwtService = app.get(JwtService);
+        const configService = app.get(ConfigService);
+        const accessSecret =
+          configService.getOrThrow<string>('JWT_ACCESS_SECRET');
+        const unverifiedToken = await jwtService.signAsync(
+          { sub: unverified.id, role: unverified.role },
+          { secret: accessSecret },
+        );
+
+        const res = await request(app.getHttpServer())
+          .post('/properties')
+          .set('Authorization', `Bearer ${unverifiedToken}`)
+          .send(salePayload())
+          .expect(403);
+
+        expect(res.body.message).toBe(
+          'Email must be verified to create a listing',
+        );
+
+        const stored = await prisma.property.count({
+          where: { ownerId: unverified.id },
+        });
+        expect(stored).toBe(0);
+      } finally {
+        await prisma.user.delete({ where: { id: unverified.id } });
+      }
+    });
   });
 
   describe('PATCH /properties/:id', () => {
