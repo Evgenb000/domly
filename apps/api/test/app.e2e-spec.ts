@@ -103,6 +103,7 @@ describe('Auth (e2e)', () => {
         googleId: `e2e-google-${UNIQUE}`,
         email,
         name: 'E2E OAuth User',
+        emailVerified: true,
       });
 
       const exchangeRes = await request(app.getHttpServer())

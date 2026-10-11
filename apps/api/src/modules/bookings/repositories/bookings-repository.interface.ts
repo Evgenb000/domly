@@ -1,14 +1,23 @@
-import type { BookingStatus, Prisma } from '@prisma/client';
+import type { BookingStatus, Prisma, PropertyStatus } from '@prisma/client';
 
 export const BOOKINGS_REPOSITORY = Symbol('BOOKINGS_REPOSITORY');
 
 export type BookingWithPropertyAndOwner = Prisma.BookingGetPayload<{
   include: {
     property: {
-      include: { owner: { select: { name: true, role: true, email: true } }; district: { include: { city: true } } };
+      include: {
+        owner: { select: { name: true; role: true; email: true } };
+        district: { include: { city: true } };
+      };
     };
   };
 }>;
+
+export type PropertyBookingPreconditions = {
+  id: string;
+  ownerId: string;
+  status: PropertyStatus;
+};
 
 export interface BookingFilters {
   status?: BookingStatus;
@@ -20,6 +29,9 @@ export interface PaginatedBookings {
 }
 
 export interface IBookingsRepository {
+  findPropertyForBooking(
+    propertyId: string,
+  ): Promise<PropertyBookingPreconditions | null>;
   createWithPropertyLock(
     propertyId: string,
     userId: string,
