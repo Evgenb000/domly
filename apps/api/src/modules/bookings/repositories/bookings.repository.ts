@@ -47,7 +47,10 @@ export class BookingsRepository implements IBookingsRepository {
         },
         include: {
           property: {
-            include: { owner: { select: { name: true, role: true, email: true } }, district: { include: { city: true } } },
+            include: {
+              owner: { select: { name: true, role: true, email: true } },
+              district: { include: { city: true } },
+            },
           },
         },
       });
@@ -59,7 +62,10 @@ export class BookingsRepository implements IBookingsRepository {
       where: { id },
       include: {
         property: {
-          include: { owner: { select: { name: true, role: true, email: true } }, district: { include: { city: true } } },
+          include: {
+            owner: { select: { name: true, role: true, email: true } },
+            district: { include: { city: true } },
+          },
         },
       },
     });
@@ -87,7 +93,10 @@ export class BookingsRepository implements IBookingsRepository {
         orderBy: { createdAt: 'desc' },
         include: {
           property: {
-            include: { owner: { select: { name: true, role: true, email: true } }, district: { include: { city: true } } },
+            include: {
+              owner: { select: { name: true, role: true, email: true } },
+              district: { include: { city: true } },
+            },
           },
         },
       }),

@@ -39,6 +39,8 @@ export class UsersRepository implements IUsersRepository {
         googleId: data.googleId,
         name: data.name,
         emailVerified: true,
+        emailVerificationToken: null,
+        emailVerificationExpiresAt: null,
       },
     });
   }
@@ -49,6 +51,8 @@ export class UsersRepository implements IUsersRepository {
       data: {
         googleId,
         emailVerified: true,
+        emailVerificationToken: null,
+        emailVerificationExpiresAt: null,
       },
     });
   }

@@ -188,6 +188,12 @@ export class AuthService {
   }
 
   async validateOAuthLogin(profile: GoogleProfile) {
+    if (!profile.emailVerified) {
+      throw new ForbiddenException(
+        'Google account email is not verified by Google',
+      );
+    }
+
     const existingByGoogleId = await this.usersRepository.findByGoogleId(
       profile.googleId,
     );
