@@ -57,6 +57,28 @@ export class UsersRepository implements IUsersRepository {
     });
   }
 
+  async linkGoogleAccountResettingCredentials(
+    userId: string,
+    googleId: string,
+  ): Promise<void> {
+    await this.prisma.$transaction([
+      this.prisma.user.update({
+        where: { id: userId },
+        data: {
+          googleId,
+          emailVerified: true,
+          emailVerificationToken: null,
+          emailVerificationExpiresAt: null,
+          passwordHash: null,
+        },
+      }),
+      this.prisma.refreshToken.updateMany({
+        where: { userId, revokedAt: null },
+        data: { revokedAt: new Date() },
+      }),
+    ]);
+  }
+
   async findMany(
     query: AdminUserQueryDto,
   ): Promise<{ items: User[]; total: number }> {

@@ -70,6 +70,9 @@ describe('AuthService.validateOAuthLogin', () => {
   let linkGoogleAccount: jest.Mock<
     (userId: string, googleId: string) => Promise<void>
   >;
+  let linkGoogleAccountResettingCredentials: jest.Mock<
+    (userId: string, googleId: string) => Promise<void>
+  >;
   let getOrThrow: jest.Mock<(key: string) => string>;
 
   beforeEach(async () => {
@@ -85,6 +88,8 @@ describe('AuthService.validateOAuthLogin', () => {
       >();
     linkGoogleAccount =
       jest.fn<(userId: string, googleId: string) => Promise<void>>();
+    linkGoogleAccountResettingCredentials =
+      jest.fn<(userId: string, googleId: string) => Promise<void>>();
     getOrThrow = jest.fn<(key: string) => string>();
 
     const moduleRef: TestingModule = await Test.createTestingModule({
@@ -98,6 +103,7 @@ describe('AuthService.validateOAuthLogin', () => {
             findByEmail,
             createOAuthUser,
             linkGoogleAccount,
+            linkGoogleAccountResettingCredentials,
           },
         },
         { provide: JwtService, useValue: {} },
@@ -129,13 +135,31 @@ describe('AuthService.validateOAuthLogin', () => {
     expect(result.emailVerified).toBe(true);
   });
 
-  it('links an existing email account and marks it as verified', async () => {
+  it('links an unverified password account by resetting its credentials', async () => {
     findByGoogleId.mockResolvedValue(null);
     findByEmail.mockResolvedValue(userFixture({ id: 'user-existing' }));
 
     const result = await service.validateOAuthLogin(verifiedProfile());
 
+    expect(linkGoogleAccountResettingCredentials).toHaveBeenCalledWith(
+      'user-existing',
+      GOOGLE_ID,
+    );
+    expect(linkGoogleAccount).not.toHaveBeenCalled();
+    expect(createOAuthUser).not.toHaveBeenCalled();
+    expect(result.id).toBe('user-existing');
+  });
+
+  it('links a verified email account with linkGoogleAccount', async () => {
+    findByGoogleId.mockResolvedValue(null);
+    findByEmail.mockResolvedValue(
+      userFixture({ id: 'user-existing', emailVerified: true }),
+    );
+
+    const result = await service.validateOAuthLogin(verifiedProfile());
+
     expect(linkGoogleAccount).toHaveBeenCalledWith('user-existing', GOOGLE_ID);
+    expect(linkGoogleAccountResettingCredentials).not.toHaveBeenCalled();
     expect(createOAuthUser).not.toHaveBeenCalled();
     expect(result.id).toBe('user-existing');
   });

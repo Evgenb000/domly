@@ -18,6 +18,10 @@ export interface IUsersRepository {
     name: string;
   }): Promise<User>;
   linkGoogleAccount(userId: string, googleId: string): Promise<void>;
+  linkGoogleAccountResettingCredentials(
+    userId: string,
+    googleId: string,
+  ): Promise<void>;
   findMany(query: AdminUserQueryDto): Promise<{ items: User[]; total: number }>;
   updateRole(id: string, role: string): Promise<User>;
   setBlocked(id: string, isBlocked: boolean): Promise<User>;
