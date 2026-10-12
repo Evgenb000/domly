@@ -24,8 +24,8 @@ type SortKey = `${SortBy}_${SortOrder}`;
 
 const SORT_OPTIONS: Array<{ value: SortKey; label: string }> = [
   { value: "createdAt_desc", label: "Спочатку нові" },
-  { value: "price_asc", label: "Ціна: від дешевших" },
-  { value: "price_desc", label: "Ціна: від дорогих" },
+  { value: "price_asc", label: "Спочатку дешевші" },
+  { value: "price_desc", label: "Спочатку дорожчі" },
 ];
 
 function parseSortKey(key: SortKey): { sortBy: SortBy; sortOrder: SortOrder } {

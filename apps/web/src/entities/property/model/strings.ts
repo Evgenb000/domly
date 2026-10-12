@@ -1,17 +1,17 @@
 export const PROPERTY_GALLERY_STRINGS = {
-  empty: "Фото відсутствуют",
-  thumbnailLabel: (index: number) => `Превью фото ${index + 1}`,
+  empty: "Фото відсутні",
+  thumbnailLabel: (index: number) => `Мініатюра фото ${index + 1}`,
 };
 
 export const PROPERTY_DETAILS_STRINGS = {
   metaTitle: "Характеристики",
-  descriptionTitle: "Описание",
-  priceLabel: "Цена",
+  descriptionTitle: "Опис",
+  priceLabel: "Ціна",
   areaLabel: "Площа",
   locationLabel: "Локація",
-  addressLabel: "Адрес",
-  minStayLabel: "Мінімальний срок проживання",
-  viewsLabel: "Проєоглянуто",
+  addressLabel: "Адреса",
+  minStayLabel: "Мінімальний термін проживання",
+  viewsLabel: "Переглянуто",
   areaFormat: (value: number) => `${value} м²`,
   locationFormat: (district: string, city: string) => `${district}, ${city}`,
   minStayFormat: (nights: number) => `${nights} ніч`,
