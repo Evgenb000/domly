@@ -74,7 +74,7 @@ export function PropertyFilters({ value, onApply }: PropertyFiltersProps) {
             <SelectValue placeholder="Тип угоди" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value={ANY_VALUE}>Всі типи</SelectItem>
+            <SelectItem value={ANY_VALUE}>Усі типи угод</SelectItem>
             {DealTypeEnum.options.map((option) => (
               <SelectItem key={option} value={option}>
                 {DEAL_TYPE_LABELS[option]}
@@ -96,7 +96,7 @@ export function PropertyFilters({ value, onApply }: PropertyFiltersProps) {
             <SelectValue placeholder="Категорія" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value={ANY_VALUE}>Всі категорії</SelectItem>
+            <SelectItem value={ANY_VALUE}>Усі категорії</SelectItem>
             {PropertyCategoryEnum.options.map((option) => (
               <SelectItem key={option} value={option}>
                 {PROPERTY_CATEGORY_LABELS[option]}
@@ -119,7 +119,7 @@ export function PropertyFilters({ value, onApply }: PropertyFiltersProps) {
             <SelectValue placeholder={districtsLoading ? "Завантаження..." : "Район"} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value={ANY_VALUE}>Всі райони</SelectItem>
+            <SelectItem value={ANY_VALUE}>Усі райони</SelectItem>
             {districts.map((district) => (
               <SelectItem key={district.id} value={district.id}>
                 {district.cityName} — {district.name}

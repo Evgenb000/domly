@@ -1,5 +1,5 @@
 export const ADD_TO_FAVORITES_STRINGS = {
-  addLabel: "Додати в избранное",
-  removeLabel: "Убрати з избранного",
-  toggleError: "Не вдалося оновити избранное",
+  addLabel: "Додати до обраного",
+  removeLabel: "Прибрати з обраного",
+  toggleError: "Не вдалося оновити обране",
 };
