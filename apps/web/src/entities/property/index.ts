@@ -22,5 +22,6 @@ export {
   PROPERTY_DETAILS_STRINGS,
 } from './model/strings';
 export { PropertyCard } from './ui/PropertyCard';
+export { PropertyCardSkeleton } from './ui/PropertyCardSkeleton';
 export { PropertyGallery } from './ui/PropertyGallery';
 export { PropertyDetailsInfo } from './ui/PropertyDetailsInfo';

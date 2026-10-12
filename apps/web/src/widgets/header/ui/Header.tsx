@@ -5,6 +5,7 @@ import { useSessionStore } from "@/shared/session/store";
 import { LogoutButton } from "@/features/auth-logout";
 import { buttonVariants } from "@/shared/ui/button";
 import { cn } from "cn";
+import { HEADER_STRINGS } from "../model/strings";
 
 export function Header() {
   const user = useSessionStore((s) => s.user);
@@ -22,6 +23,12 @@ export function Header() {
         ) : user ? (
           <>
             <span className="text-sm text-muted-foreground">{user.name}</span>
+            <Link
+              href="/favorites"
+              className={cn(buttonVariants({ variant: "ghost" }))}
+            >
+              {HEADER_STRINGS.favorites}
+            </Link>
             <LogoutButton />
           </>
         ) : (
@@ -30,10 +37,10 @@ export function Header() {
               href="/login"
               className={cn(buttonVariants({ variant: "ghost" }))}
             >
-              Увійти
+              {HEADER_STRINGS.login}
             </Link>
             <Link href="/register" className={cn(buttonVariants())}>
-              Реєстрація
+              {HEADER_STRINGS.register}
             </Link>
           </>
         )}

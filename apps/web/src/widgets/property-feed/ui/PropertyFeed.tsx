@@ -6,7 +6,7 @@ import type { PropertyQueryDto } from "@domly/shared";
 import { getProperties } from "@/entities/property/api/getProperties";
 import type { PaginationMeta, Property } from "@/entities/property/model/types";
 import type { PropertyFilterValues } from "@/entities/property";
-import { PropertyCard } from "@/entities/property/ui/PropertyCard";
+import { PropertyCard, PropertyCardSkeleton } from "@/entities/property";
 import { useIntersectionObserver } from "@/shared/hooks/useIntersectionObserver";
 import {
   Select,
@@ -38,17 +38,6 @@ function getErrorMessage(error: unknown): string {
     return error.message;
   }
   return "Невідома помилка";
-}
-
-function PropertyCardSkeleton() {
-  return (
-    <div className="animate-pulse rounded-xl border-border bg-card p-4">
-      <div className="mb-3 aspect-4/3 w-full rounded-lg bg-secondary" />
-      <div className="mb-1 h-4 w-2/3 rounded bg-muted" />
-      <div className="mb-3 h-3 w-1/2 rounded bg-muted" />
-      <div className="h-4 w-1/3 rounded bg-muted" />
-    </div>
-  );
 }
 
 interface PropertyFeedProps {
