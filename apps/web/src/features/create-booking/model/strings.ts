@@ -4,4 +4,6 @@ export const CREATE_BOOKING_STRINGS = {
   success: "Об'єкт заброньовано на 24 години",
   alreadyReserved: "Об'єкт вже заброньовано",
   genericError: "Не вдалося забронювати об'єкт",
+  verifyEmailRequired: "Підтвердіть пошту, щоб забронювати об'єкт",
+  notFound: "Оголошення більше недоступне",
 };
