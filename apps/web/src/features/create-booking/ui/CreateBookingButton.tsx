@@ -49,6 +49,23 @@ export function CreateBookingButton({ property, onBooked }: CreateBookingButtonP
     ) : null;
   }
 
+  if (user.emailVerified === false) {
+    return (
+      <div className="flex flex-col gap-1">
+        <button
+          type="button"
+          disabled
+          className={cn(buttonVariants({ size: "lg" }), "w-full")}
+        >
+          {CREATE_BOOKING_STRINGS.book}
+        </button>
+        <p className="text-xs text-muted-foreground">
+          {CREATE_BOOKING_STRINGS.verifyEmailRequired}
+        </p>
+      </div>
+    );
+  }
+
   const submit = async () => {
     if (state === "pending") return;
     setState("pending");
@@ -61,6 +78,11 @@ export function CreateBookingButton({ property, onBooked }: CreateBookingButtonP
       setState("idle");
       if (err instanceof ApiError && err.statusCode === 409) {
         setError(CREATE_BOOKING_STRINGS.alreadyReserved);
+        onBooked();
+      } else if (err instanceof ApiError && err.statusCode === 403) {
+        setError(CREATE_BOOKING_STRINGS.verifyEmailRequired);
+      } else if (err instanceof ApiError && err.statusCode === 404) {
+        setError(CREATE_BOOKING_STRINGS.notFound);
         onBooked();
       } else {
         setError(CREATE_BOOKING_STRINGS.genericError);
