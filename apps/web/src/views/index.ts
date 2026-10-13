@@ -1,1 +1,1 @@
-export {}
+export { MyBookingsView } from "./my-bookings";

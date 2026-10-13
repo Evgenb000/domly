@@ -4,6 +4,7 @@ export type {
   PropertyDealType,
   PropertyStatus,
   PropertyOwnerRole,
+  PaginationMeta,
 } from './model/types';
 export { toProperty } from './model/mapper';
 export { getProperty } from './api/getProperty';
