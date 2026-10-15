@@ -64,3 +64,20 @@ body {
   color: hsl(var(--foreground));
   font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
 }
+
+.domly-map-tiles {
+  filter: invert(1) hue-rotate(180deg) brightness(0.95) contrast(0.9);
+}
+
+.leaflet-container {
+  background: hsl(var(--background));
+}
+
+.domly-map-marker {
+  width: 20px;
+  height: 20px;
+  border-radius: 9999px;
+  background: hsl(var(--primary));
+  border: 2px solid hsl(var(--foreground));
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.45);
+}
