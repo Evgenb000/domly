@@ -150,16 +150,14 @@ export class PropertiesService {
   }
 
   async remove(id: string): Promise<void> {
-    try {
-      await this.propertiesRepository.delete(id);
-    } catch (error) {
-      if (
-        error instanceof Prisma.PrismaClientKnownRequestError &&
-        error.code === 'P2025'
-      ) {
+    const deleted = await this.propertiesRepository.deleteIfAvailable(id);
+
+    if (!deleted) {
+      const existing = await this.propertiesRepository.findById(id);
+      if (!existing) {
         throw new NotFoundException('Property not found');
       }
-      throw error;
+      throw new ConflictException('Property is reserved and cannot be deleted');
     }
   }
 

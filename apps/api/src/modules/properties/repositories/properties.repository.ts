@@ -75,8 +75,11 @@ export class PropertiesRepository implements IPropertiesRepository {
     });
   }
 
-  async delete(id: string): Promise<void> {
-    await this.prisma.property.delete({ where: { id } });
+  async deleteIfAvailable(id: string): Promise<boolean> {
+    const result = await this.prisma.property.deleteMany({
+      where: { id, status: 'AVAILABLE' },
+    });
+    return result.count === 1;
   }
 
   async incrementViews(id: string): Promise<void> {
