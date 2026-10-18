@@ -33,6 +33,7 @@ export function PropertyGallery({ photos, title }: PropertyGalleryProps) {
             src={activePhoto}
             alt={title}
             fill
+            unoptimized
             sizes="(max-width: 768px) 100vw, 60vw"
             className="object-cover"
           />
@@ -61,6 +62,7 @@ export function PropertyGallery({ photos, title }: PropertyGalleryProps) {
                   alt=""
                   aria-hidden
                   fill
+                  unoptimized
                   sizes="96px"
                   className="object-cover"
                 />

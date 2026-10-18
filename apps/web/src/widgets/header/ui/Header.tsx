@@ -24,6 +24,12 @@ export function Header() {
           <>
             <span className="text-sm text-muted-foreground">{user.name}</span>
             <Link
+              href="/properties/new"
+              className={cn(buttonVariants())}
+            >
+              {HEADER_STRINGS.addListing}
+            </Link>
+            <Link
               href="/bookings"
               className={cn(buttonVariants({ variant: "ghost" }))}
             >

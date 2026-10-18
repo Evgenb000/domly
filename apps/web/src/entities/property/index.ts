@@ -8,6 +8,7 @@ export type {
 } from './model/types';
 export { toProperty } from './model/mapper';
 export { getProperty } from './api/getProperty';
+export { createProperty } from './api/createProperty';
 export { getPriceLabel } from './model/priceLabel';
 export { formatPrice } from './model/format';
 export type { PropertyFilterValues } from './model/filters';

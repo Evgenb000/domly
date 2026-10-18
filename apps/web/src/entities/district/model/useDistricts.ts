@@ -7,15 +7,22 @@ import type { District } from "./types";
 export function useDistricts() {
   const [districts, setDistricts] = useState<District[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isError, setIsError] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
     void getDistricts()
       .then((result) => {
-        if (!cancelled) setDistricts(result);
+        if (!cancelled) {
+          setIsError(false);
+          setDistricts(result);
+        }
       })
       .catch(() => {
-        if (!cancelled) setDistricts([]);
+        if (!cancelled) {
+          setIsError(true);
+          setDistricts([]);
+        }
       })
       .finally(() => {
         if (!cancelled) setIsLoading(false);
@@ -25,5 +32,5 @@ export function useDistricts() {
     };
   }, []);
 
-  return { districts, isLoading };
+  return { districts, isLoading, isError };
 }

@@ -26,6 +26,7 @@ export function PropertyCard({ property }: PropertyCardProps) {
               src={property.photos[0]}
               alt={property.title}
               fill
+              unoptimized
               className="object-cover"
               sizes="(max-width: 768px) 100vw, 33vw"
             />
