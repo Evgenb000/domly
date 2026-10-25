@@ -362,6 +362,52 @@ describe('Properties (e2e)', () => {
         .send(salePayload())
         .expect(404);
     });
+
+    it('владелец может обнулить address, не прислав поле в PATCH', async () => {
+      const { id } = await seedProperty({
+        address: 'вул. Тестова, 1',
+        price: 100000,
+      });
+
+      const res = await request(app.getHttpServer())
+        .patch(`/properties/${id}`)
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .send(salePayload({ title: 'Updated without address' }))
+        .expect(200);
+
+      expect(res.body.address).toBeNull();
+
+      const getRes = await request(app.getHttpServer())
+        .get(`/properties/${id}`)
+        .expect(200);
+      expect(getRes.body.address).toBeNull();
+    });
+
+    it('лишние поля moderationStatus и status вырезаются схемой при PATCH', async () => {
+      const { id } = await seedProperty({ price: 100000 });
+
+      const res = await request(app.getHttpServer())
+        .patch(`/properties/${id}`)
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .send(salePayload({ moderationStatus: 'REJECTED', status: 'RESERVED' }))
+        .expect(200);
+
+      expect(res.body.moderationStatus).toBe('APPROVED');
+      expect(res.body.status).toBe('AVAILABLE');
+    });
+
+    it('обновление полей объекта со статусом RESERVED не меняет статус', async () => {
+      const { id } = await seedProperty({ status: 'RESERVED', price: 100000 });
+
+      const res = await request(app.getHttpServer())
+        .patch(`/properties/${id}`)
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .send(salePayload({ title: 'Reserved property updated' }))
+        .expect(200);
+
+      expect(res.body.title).toBe('Reserved property updated');
+      expect(res.body.status).toBe('RESERVED');
+    });
   });
 
   describe('DELETE /properties/:id', () => {
