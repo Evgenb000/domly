@@ -3,11 +3,14 @@ export type {
   PropertyCategory,
   PropertyDealType,
   PropertyStatus,
+  PropertyModerationStatus,
   PropertyOwnerRole,
   PaginationMeta,
 } from './model/types';
 export { toProperty } from './model/mapper';
 export { getProperty } from './api/getProperty';
+export { getMyProperties } from './api/getMyProperties';
+export { deleteProperty } from './api/deleteProperty';
 export { createProperty } from './api/createProperty';
 export { getPriceLabel } from './model/priceLabel';
 export { formatPrice } from './model/format';
@@ -17,6 +20,7 @@ export {
   DEAL_TYPE_LABELS,
   PROPERTY_CATEGORY_LABELS,
   PROPERTY_STATUS_LABELS,
+  MODERATION_STATUS_LABELS,
   OWNER_ROLE_LABELS,
 } from './model/labels';
 export {

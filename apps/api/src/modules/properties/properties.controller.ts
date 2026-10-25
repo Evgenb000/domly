@@ -44,8 +44,10 @@ export class PropertiesController {
 
   @Get('my')
   @UseGuards(JwtAccessGuard)
-  async findMyProperties(@CurrentUser() currentUser: CurrentUserPayload) {
-    const query = PropertyQuerySchema.parse({});
+  async findMyProperties(
+    @CurrentUser() currentUser: CurrentUserPayload,
+    @Query(new ZodValidationPipe(PropertyQuerySchema)) query: PropertyQueryDto,
+  ) {
     const result = await this.propertiesService.findMyProperties(
       currentUser.id,
       query,

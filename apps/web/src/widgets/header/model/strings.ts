@@ -4,4 +4,5 @@ export const HEADER_STRINGS = {
   favorites: "Обране",
   myBookings: "Мої бронювання",
   addListing: "Додати оголошення",
+  myListings: "Мої оголошення",
 };

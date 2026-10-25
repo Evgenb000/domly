@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { Card } from "@/shared/ui/card";
 import { Badge } from "@/shared/ui/badge";
 import type { Property } from "../model/types";
@@ -9,9 +10,10 @@ import { DEAL_TYPE_LABELS } from "../model/labels";
 
 interface PropertyCardProps {
   property: Property;
+  actions?: ReactNode;
 }
 
-export function PropertyCard({ property }: PropertyCardProps) {
+export function PropertyCard({ property, actions }: PropertyCardProps) {
   const price = getPriceLabel(property);
 
   return (
@@ -60,6 +62,10 @@ export function PropertyCard({ property }: PropertyCardProps) {
           </div>
         </div>
       </Link>
+
+      {actions ? (
+        <div className="mt-3 flex flex-col gap-2">{actions}</div>
+      ) : null}
     </Card>
   );
 }

@@ -401,6 +401,19 @@ describe('Properties (e2e)', () => {
       expect(stored).toBeNull();
     });
 
+    it('удаление RESERVED-объявления — 409, объявление остаётся в БД', async () => {
+      const { id } = await seedProperty({ status: 'RESERVED' });
+
+      await request(app.getHttpServer())
+        .delete(`/properties/${id}`)
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .expect(409);
+
+      const stored = await prisma.property.findUnique({ where: { id } });
+      expect(stored).not.toBeNull();
+      expect(stored?.status).toBe('RESERVED');
+    });
+
     it('повторное удаление — 404', async () => {
       const { id } = await seedProperty();
 
@@ -524,9 +537,61 @@ describe('Properties (e2e)', () => {
       expect(ids).not.toContain(theirProperty.id);
       expect(items.every((item) => item.ownerId === ownerId)).toBe(true);
     });
+
+    it('пагинация limit=2: страница 1 из 3, totalPages=2, содержит REJECTED и APPROVED', async () => {
+      const base = new Date('2026-01-01T00:00:00.000Z');
+      const approved1 = await seedProperty({
+        createdAt: new Date(base.getTime() + 1000),
+      });
+      const approved2 = await seedProperty({
+        createdAt: new Date(base.getTime() + 2000),
+      });
+      const rejected = await seedProperty({
+        moderationStatus: 'REJECTED',
+        createdAt: new Date(base.getTime() + 3000),
+      });
+
+      const res = await request(app.getHttpServer())
+        .get('/properties/my?limit=2')
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .expect(200);
+
+      const items = res.body.items as Array<{
+        id: string;
+        moderationStatus: string;
+      }>;
+      expect(items).toHaveLength(2);
+      expect(res.body.meta.totalPages).toBe(2);
+
+      const ids = items.map((item) => item.id);
+      expect(ids).toContain(rejected.id);
+      expect(ids).toContain(approved2.id);
+      expect(ids).not.toContain(approved1.id);
+
+      const statuses = items.map((item) => item.moderationStatus);
+      expect(statuses).toContain('REJECTED');
+      expect(statuses).toContain('APPROVED');
+    });
   });
 
   describe('GET /properties/:id (+ view counter)', () => {
+    it('аноним смотрит REJECTED — 404', async () => {
+      const { id } = await seedProperty({ moderationStatus: 'REJECTED' });
+
+      await request(app.getHttpServer()).get(`/properties/${id}`).expect(404);
+    });
+
+    it('ADMIN смотрит REJECTED — 200', async () => {
+      const { id } = await seedProperty({ moderationStatus: 'REJECTED' });
+
+      const res = await request(app.getHttpServer())
+        .get(`/properties/${id}`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .expect(200);
+
+      expect(res.body.id).toBe(id);
+      expect(res.body.moderationStatus).toBe('REJECTED');
+    });
     it('владелец смотрит своё REJECTED — виден, не 404', async () => {
       const { id } = await seedProperty({ moderationStatus: 'REJECTED' });
 

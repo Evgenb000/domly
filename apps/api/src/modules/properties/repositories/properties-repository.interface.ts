@@ -40,7 +40,7 @@ export interface IPropertiesRepository {
   findById(id: string): Promise<PropertyWithDistrict | null>;
   create(input: PropertyCreateInput): Promise<PropertyWithDistrict>;
   update(id: string, input: PropertyUpdateInput): Promise<PropertyWithDistrict>;
-  delete(id: string): Promise<void>;
+  deleteIfAvailable(id: string): Promise<boolean>;
   incrementViews(id: string): Promise<void>;
   updateModerationStatus(
     id: string,

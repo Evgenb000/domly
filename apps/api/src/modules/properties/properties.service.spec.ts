@@ -149,3 +149,64 @@ describe('PropertiesService.create', () => {
     });
   });
 });
+
+describe('PropertiesService.remove', () => {
+  let service: PropertiesService;
+  let deleteIfAvailable: jest.Mock<(id: string) => Promise<boolean>>;
+  let findById: jest.Mock<(id: string) => Promise<PropertyWithDistrict | null>>;
+
+  beforeEach(async () => {
+    deleteIfAvailable = jest.fn();
+    findById = jest.fn();
+
+    const moduleRef: TestingModule = await Test.createTestingModule({
+      providers: [
+        PropertiesService,
+        UsersService,
+        { provide: USERS_REPOSITORY, useValue: { findById: jest.fn() } },
+        {
+          provide: PROPERTIES_REPOSITORY,
+          useValue: { deleteIfAvailable, findById },
+        },
+        {
+          provide: EffectivePricingService,
+          useValue: { calculate: jest.fn() },
+        },
+        { provide: RedisService, useValue: { setNx: jest.fn() } },
+      ],
+    }).compile();
+
+    service = moduleRef.get<PropertiesService>(PropertiesService);
+  });
+
+  it('deleteIfAvailable=false при существующем объекте — ConflictException', async () => {
+    deleteIfAvailable.mockResolvedValue(false);
+    findById.mockResolvedValue(propertyFixture());
+
+    await expectHttpError(
+      service.remove('property-1'),
+      409,
+      'Property is reserved and cannot be deleted',
+    );
+    expect(findById).toHaveBeenCalledWith('property-1');
+  });
+
+  it('deleteIfAvailable=false при отсутствии объекта — NotFoundException', async () => {
+    deleteIfAvailable.mockResolvedValue(false);
+    findById.mockResolvedValue(null);
+
+    await expectHttpError(
+      service.remove('property-1'),
+      404,
+      'Property not found',
+    );
+    expect(findById).toHaveBeenCalledWith('property-1');
+  });
+
+  it('deleteIfAvailable=true — удаляет без ошибки, findById не вызывается', async () => {
+    deleteIfAvailable.mockResolvedValue(true);
+
+    await expect(service.remove('property-1')).resolves.toBeUndefined();
+    expect(findById).not.toHaveBeenCalled();
+  });
+});
