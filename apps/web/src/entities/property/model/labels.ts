@@ -1,3 +1,5 @@
+import type { PropertyModerationStatus } from "./types";
+
 export const DEAL_TYPE_LABELS: Record<
   "SALE" | "LONG_TERM_RENT" | "DAILY_RENT",
   string
@@ -20,6 +22,11 @@ export const PROPERTY_CATEGORY_LABELS: Record<
 export const PROPERTY_STATUS_LABELS: Record<"AVAILABLE" | "RESERVED", string> = {
   AVAILABLE: "Доступно",
   RESERVED: "Заброньовано",
+};
+
+export const MODERATION_STATUS_LABELS: Record<PropertyModerationStatus, string> = {
+  APPROVED: "Опубліковано",
+  REJECTED: "Приховано модератором",
 };
 
 export const OWNER_ROLE_LABELS: Record<"USER" | "REALTOR" | "DEVELOPER" | "ADMIN", string> = {

@@ -4,6 +4,7 @@ export type PropertyCategory = PropertyResponseDto['category'];
 export type PropertyDealType = PropertyResponseDto['dealType'];
 export type PropertyStatus = PropertyResponseDto['status'];
 export type PropertyOwnerRole = PropertyResponseDto['ownerRole'];
+export type PropertyModerationStatus = PropertyResponseDto['moderationStatus'];
 
 export interface Property {
   id: string;
@@ -15,6 +16,7 @@ export interface Property {
   category: PropertyCategory;
   dealType: PropertyDealType;
   status: PropertyStatus;
+  moderationStatus: PropertyModerationStatus;
   price: number | null;
   pricePerNight: number | null;
   minStayNights: number | null;

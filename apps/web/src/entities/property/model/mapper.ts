@@ -12,6 +12,7 @@ export function toProperty(dto: PropertyResponseDto): Property {
     category: dto.category,
     dealType: dto.dealType,
     status: dto.status,
+    moderationStatus: dto.moderationStatus,
     price: dto.price,
     pricePerNight: dto.pricePerNight,
     minStayNights: dto.minStayNights,

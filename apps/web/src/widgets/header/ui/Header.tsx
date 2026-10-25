@@ -30,6 +30,12 @@ export function Header() {
               {HEADER_STRINGS.addListing}
             </Link>
             <Link
+              href="/my-listings"
+              className={cn(buttonVariants({ variant: "ghost" }))}
+            >
+              {HEADER_STRINGS.myListings}
+            </Link>
+            <Link
               href="/bookings"
               className={cn(buttonVariants({ variant: "ghost" }))}
             >
