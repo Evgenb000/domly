@@ -1,2 +1,2 @@
 export { CancelBookingButton } from "./cancel-booking";
-export { CreatePropertyForm } from "./create-property";
+export { PropertyForm } from "./property-form";

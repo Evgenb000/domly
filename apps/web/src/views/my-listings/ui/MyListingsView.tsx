@@ -13,6 +13,8 @@ import {
 } from "@/entities/property";
 import { Badge } from "@/shared/ui/badge";
 import { DeletePropertyButton } from "@/features/delete-property";
+import { buttonVariants } from "@/shared/ui/button";
+import { cn } from "cn";
 import { MY_LISTINGS_VIEW_STRINGS } from "../model/strings";
 
 export function MyListingsView() {
@@ -201,6 +203,12 @@ export function MyListingsView() {
                         {MY_LISTINGS_VIEW_STRINGS.rejectedNote}
                       </p>
                     ) : null}
+                    <Link
+                      href={`/properties/${property.id}/edit`}
+                      className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
+                    >
+                      {MY_LISTINGS_VIEW_STRINGS.edit}
+                    </Link>
                     <DeletePropertyButton
                       propertyId={property.id}
                       onDeleted={handleDeleted}

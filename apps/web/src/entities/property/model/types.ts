@@ -24,8 +24,11 @@ export interface Property {
   effectivePrice: number;
   area: number;
   address: string | null;
+  latitude: number;
+  longitude: number;
   photos: string[];
   viewsCount: number;
+  districtId: string;
   districtName: string;
   cityName: string;
   createdAt: string;

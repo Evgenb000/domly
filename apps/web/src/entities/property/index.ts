@@ -8,10 +8,13 @@ export type {
   PaginationMeta,
 } from './model/types';
 export { toProperty } from './model/mapper';
+export { toFormValues } from './model/formValues';
+export type { PropertyFormValues } from './model/formValues';
 export { getProperty } from './api/getProperty';
 export { getMyProperties } from './api/getMyProperties';
 export { deleteProperty } from './api/deleteProperty';
 export { createProperty } from './api/createProperty';
+export { updateProperty } from './api/updateProperty';
 export { getPriceLabel } from './model/priceLabel';
 export { formatPrice } from './model/format';
 export type { PropertyFilterValues } from './model/filters';

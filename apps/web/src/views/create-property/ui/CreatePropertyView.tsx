@@ -1,4 +1,4 @@
-import { CreatePropertyForm } from "@/features/create-property";
+import { PropertyForm } from "@/features/property-form";
 import { CREATE_PROPERTY_VIEW_STRINGS } from "../model/strings";
 
 export function CreatePropertyView() {
@@ -7,7 +7,7 @@ export function CreatePropertyView() {
       <h1 className="text-2xl font-semibold text-foreground">
         {CREATE_PROPERTY_VIEW_STRINGS.title}
       </h1>
-      <CreatePropertyForm />
+      <PropertyForm />
     </section>
   );
 }

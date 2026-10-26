@@ -1,4 +1,4 @@
-export const CREATE_PROPERTY_STRINGS = {
+export const PROPERTY_FORM_STRINGS = {
   dealType: "Тип угоди",
   category: "Категорія",
   title: "Заголовок",
@@ -26,4 +26,10 @@ export const CREATE_PROPERTY_STRINGS = {
   submitting: "Публікація...",
   verifyEmailRequired: "Підтвердіть пошту, щоб створити оголошення",
   genericError: "Не вдалося створити оголошення",
+  dealTypeLocked: "Тип угоди не можна змінити",
+  submitEdit: "Зберегти зміни",
+  submittingEdit: "Збереження...",
+  genericEditError: "Не вдалося зберегти зміни",
+  forbiddenEdit: "У вас немає прав редагувати це оголошення",
+  notFoundEdit: "Оголошення не знайдено",
 };

@@ -66,6 +66,7 @@ export class PropertiesRepository implements IPropertiesRepository {
       where: { id },
       data: {
         ...input.data,
+        address: input.data.address || null,
         effectivePrice: input.effectivePrice,
       },
       include: {

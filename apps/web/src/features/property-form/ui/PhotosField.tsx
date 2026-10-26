@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
-import { CREATE_PROPERTY_STRINGS } from "../model/strings";
+import { PROPERTY_FORM_STRINGS } from "../model/strings";
 
 const MAX_PHOTOS = 20;
 
@@ -24,22 +24,22 @@ export function PhotosField({ value, onChange }: PhotosFieldProps) {
     try {
       parsed = new URL(trimmed);
     } catch {
-      setError(CREATE_PROPERTY_STRINGS.photoInvalid);
+      setError(PROPERTY_FORM_STRINGS.photoInvalid);
       return;
     }
 
     if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
-      setError(CREATE_PROPERTY_STRINGS.photoInvalid);
+      setError(PROPERTY_FORM_STRINGS.photoInvalid);
       return;
     }
 
     if (value.includes(trimmed)) {
-      setError(CREATE_PROPERTY_STRINGS.photoDuplicate);
+      setError(PROPERTY_FORM_STRINGS.photoDuplicate);
       return;
     }
 
     if (value.length >= MAX_PHOTOS) {
-      setError(CREATE_PROPERTY_STRINGS.photosLimit);
+      setError(PROPERTY_FORM_STRINGS.photosLimit);
       return;
     }
 
@@ -55,18 +55,18 @@ export function PhotosField({ value, onChange }: PhotosFieldProps) {
   return (
     <div className="flex flex-col gap-3">
       <p className="text-xs text-muted-foreground">
-        {CREATE_PROPERTY_STRINGS.photosHint}
+        {PROPERTY_FORM_STRINGS.photosHint}
       </p>
 
       <div className="flex items-center gap-2">
         <Input
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
-          placeholder={CREATE_PROPERTY_STRINGS.photoUrlPlaceholder}
+          placeholder={PROPERTY_FORM_STRINGS.photoUrlPlaceholder}
           aria-invalid={Boolean(error)}
         />
         <Button type="button" onClick={handleAdd}>
-          {CREATE_PROPERTY_STRINGS.addPhoto}
+          {PROPERTY_FORM_STRINGS.addPhoto}
         </Button>
       </div>
 
@@ -86,7 +86,7 @@ export function PhotosField({ value, onChange }: PhotosFieldProps) {
                 size="sm"
                 onClick={() => handleRemove(url)}
               >
-                {CREATE_PROPERTY_STRINGS.removePhoto}
+                {PROPERTY_FORM_STRINGS.removePhoto}
               </Button>
             </li>
           ))}
