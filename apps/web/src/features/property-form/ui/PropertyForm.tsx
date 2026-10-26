@@ -12,6 +12,7 @@ import {
 } from "@domly/shared";
 import {
   createProperty,
+  updateProperty,
   DEAL_TYPE_LABELS,
   PROPERTY_CATEGORY_LABELS,
   type PropertyDealType,
@@ -74,7 +75,11 @@ function TextArea({ className, ...props }: React.ComponentProps<"textarea">) {
   );
 }
 
-export function PropertyForm() {
+export interface PropertyFormProps {
+  edit?: { propertyId: string; initialValues: PropertyFormValues };
+}
+
+export function PropertyForm({ edit }: PropertyFormProps = {}) {
   const router = useRouter();
   const user = useSessionStore((s) => s.user);
   const [formError, setFormError] = useState<string | null>(null);
@@ -95,7 +100,7 @@ export function PropertyForm() {
     formState,
   } = useForm<PropertyFormValues>({
     resolver: zodResolver(CreatePropertySchema),
-    defaultValues: PROPERTY_FORM_DEFAULTS,
+    defaultValues: edit ? edit.initialValues : PROPERTY_FORM_DEFAULTS,
   });
 
   const { errors, isSubmitting } = formState;
@@ -113,7 +118,9 @@ export function PropertyForm() {
       : null;
 
   const hasLocationError = Boolean(errors.latitude || errors.longitude);
-  const emailVerificationFailed = user?.emailVerified === false;
+  const isEditMode = edit !== undefined;
+  const emailVerificationFailed =
+    !isEditMode && user?.emailVerified === false;
 
   const handleLocationChange = (coordinates: Coordinates) => {
     setValue("latitude", coordinates.latitude, { shouldValidate: true });
@@ -131,8 +138,10 @@ export function PropertyForm() {
   const onSubmit = handleSubmit(async (values) => {
     setFormError(null);
     try {
-      const created = await createProperty(values);
-      router.push(`/properties/${created.id}`);
+      const saved = edit
+        ? await updateProperty(edit.propertyId, values)
+        : await createProperty(values);
+      router.push(`/properties/${saved.id}`);
     } catch (error) {
       if (error instanceof ApiError) {
         if (error.fieldErrors) {
@@ -144,34 +153,59 @@ export function PropertyForm() {
           return;
         }
         if (error.statusCode === 403) {
-          setFormError(PROPERTY_FORM_STRINGS.verifyEmailRequired);
+          setFormError(
+            isEditMode
+              ? PROPERTY_FORM_STRINGS.forbiddenEdit
+              : PROPERTY_FORM_STRINGS.verifyEmailRequired,
+          );
+          return;
+        }
+        if (error.statusCode === 404 && isEditMode) {
+          setFormError(PROPERTY_FORM_STRINGS.notFoundEdit);
           return;
         }
       }
-      setFormError(PROPERTY_FORM_STRINGS.genericError);
+      setFormError(
+        isEditMode
+          ? PROPERTY_FORM_STRINGS.genericEditError
+          : PROPERTY_FORM_STRINGS.genericError,
+      );
     }
   });
 
   return (
     <form onSubmit={onSubmit} className="flex w-full max-w-2xl flex-col gap-6">
       <FormField label={PROPERTY_FORM_STRINGS.dealType}>
-        <Select
-          value={dealType}
-          onValueChange={(v) => {
-            if (v !== null) handleDealTypeChange(v);
-          }}
-        >
-          <SelectTrigger className="w-full">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {DealTypeEnum.options.map((option) => (
-              <SelectItem key={option} value={option}>
-                {DEAL_TYPE_LABELS[option]}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        {isEditMode ? (
+          <>
+            <Input
+              value={DEAL_TYPE_LABELS[dealType]}
+              readOnly
+              disabled
+            />
+            <p className="text-xs text-muted-foreground">
+              {PROPERTY_FORM_STRINGS.dealTypeLocked}
+            </p>
+          </>
+        ) : (
+          <Select
+            value={dealType}
+            onValueChange={(v) => {
+              if (v !== null) handleDealTypeChange(v);
+            }}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {DealTypeEnum.options.map((option) => (
+                <SelectItem key={option} value={option}>
+                  {DEAL_TYPE_LABELS[option]}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
       </FormField>
 
       <FormField label={PROPERTY_FORM_STRINGS.category}>
@@ -334,8 +368,12 @@ export function PropertyForm() {
       ) : (
         <Button type="submit" disabled={isSubmitting}>
           {isSubmitting
-            ? PROPERTY_FORM_STRINGS.submitting
-            : PROPERTY_FORM_STRINGS.submit}
+            ? isEditMode
+              ? PROPERTY_FORM_STRINGS.submittingEdit
+              : PROPERTY_FORM_STRINGS.submitting
+            : isEditMode
+              ? PROPERTY_FORM_STRINGS.submitEdit
+              : PROPERTY_FORM_STRINGS.submit}
         </Button>
       )}
     </form>
