@@ -15,6 +15,7 @@ import {
   DEAL_TYPE_LABELS,
   PROPERTY_CATEGORY_LABELS,
   type PropertyDealType,
+  type PropertyFormValues,
 } from "@/entities/property";
 import { useDistricts } from "@/entities/district";
 import { useSessionStore } from "@/shared/session/store";
@@ -34,11 +35,8 @@ import {
   type Coordinates,
 } from "@/shared/ui/location-picker";
 import { cn } from "cn";
-import { CREATE_PROPERTY_STRINGS } from "../model/strings";
-import {
-  CREATE_PROPERTY_DEFAULTS,
-  type CreatePropertyFormValues,
-} from "../model/defaults";
+import { PROPERTY_FORM_STRINGS } from "../model/strings";
+import { PROPERTY_FORM_DEFAULTS } from "../model/defaults";
 import { PhotosField } from "./PhotosField";
 import { PriceFields } from "./PriceFields";
 
@@ -76,7 +74,7 @@ function TextArea({ className, ...props }: React.ComponentProps<"textarea">) {
   );
 }
 
-export function CreatePropertyForm() {
+export function PropertyForm() {
   const router = useRouter();
   const user = useSessionStore((s) => s.user);
   const [formError, setFormError] = useState<string | null>(null);
@@ -95,9 +93,9 @@ export function CreatePropertyForm() {
     getFieldState,
     control,
     formState,
-  } = useForm<CreatePropertyFormValues>({
+  } = useForm<PropertyFormValues>({
     resolver: zodResolver(CreatePropertySchema),
-    defaultValues: CREATE_PROPERTY_DEFAULTS,
+    defaultValues: PROPERTY_FORM_DEFAULTS,
   });
 
   const { errors, isSubmitting } = formState;
@@ -139,24 +137,24 @@ export function CreatePropertyForm() {
       if (error instanceof ApiError) {
         if (error.fieldErrors) {
           for (const fieldError of error.fieldErrors) {
-            setError(fieldError.path as FieldPath<CreatePropertyFormValues>, {
+            setError(fieldError.path as FieldPath<PropertyFormValues>, {
               message: fieldError.message,
             });
           }
           return;
         }
         if (error.statusCode === 403) {
-          setFormError(CREATE_PROPERTY_STRINGS.verifyEmailRequired);
+          setFormError(PROPERTY_FORM_STRINGS.verifyEmailRequired);
           return;
         }
       }
-      setFormError(CREATE_PROPERTY_STRINGS.genericError);
+      setFormError(PROPERTY_FORM_STRINGS.genericError);
     }
   });
 
   return (
     <form onSubmit={onSubmit} className="flex w-full max-w-2xl flex-col gap-6">
-      <FormField label={CREATE_PROPERTY_STRINGS.dealType}>
+      <FormField label={PROPERTY_FORM_STRINGS.dealType}>
         <Select
           value={dealType}
           onValueChange={(v) => {
@@ -176,7 +174,7 @@ export function CreatePropertyForm() {
         </Select>
       </FormField>
 
-      <FormField label={CREATE_PROPERTY_STRINGS.category}>
+      <FormField label={PROPERTY_FORM_STRINGS.category}>
         <Select
           value={category}
           onValueChange={(v) => {
@@ -199,7 +197,7 @@ export function CreatePropertyForm() {
       </FormField>
 
       <FormField
-        label={CREATE_PROPERTY_STRINGS.title}
+        label={PROPERTY_FORM_STRINGS.title}
         htmlFor="title"
         error={errors.title?.message}
       >
@@ -211,7 +209,7 @@ export function CreatePropertyForm() {
       </FormField>
 
       <FormField
-        label={CREATE_PROPERTY_STRINGS.description}
+        label={PROPERTY_FORM_STRINGS.description}
         htmlFor="description"
         error={errors.description?.message}
       >
@@ -224,7 +222,7 @@ export function CreatePropertyForm() {
       </FormField>
 
       <FormField
-        label={CREATE_PROPERTY_STRINGS.area}
+        label={PROPERTY_FORM_STRINGS.area}
         htmlFor="area"
         error={errors.area?.message}
       >
@@ -239,7 +237,7 @@ export function CreatePropertyForm() {
       </FormField>
 
       <FormField
-        label={CREATE_PROPERTY_STRINGS.address}
+        label={PROPERTY_FORM_STRINGS.address}
         htmlFor="address"
         error={errors.address?.message}
       >
@@ -253,7 +251,7 @@ export function CreatePropertyForm() {
       </FormField>
 
       <FormField
-        label={CREATE_PROPERTY_STRINGS.district}
+        label={PROPERTY_FORM_STRINGS.district}
         error={errors.districtId?.message}
       >
         {districtsLoading ? (
@@ -269,7 +267,7 @@ export function CreatePropertyForm() {
             }}
           >
             <SelectTrigger className="w-full">
-              <SelectValue placeholder={CREATE_PROPERTY_STRINGS.districtPlaceholder} />
+              <SelectValue placeholder={PROPERTY_FORM_STRINGS.districtPlaceholder} />
             </SelectTrigger>
             <SelectContent>
               {districts.map((district) => (
@@ -282,7 +280,7 @@ export function CreatePropertyForm() {
         )}
         {districtsError ? (
           <p className="text-xs text-destructive">
-            {CREATE_PROPERTY_STRINGS.districtsError}
+            {PROPERTY_FORM_STRINGS.districtsError}
           </p>
         ) : null}
       </FormField>
@@ -301,16 +299,16 @@ export function CreatePropertyForm() {
       />
 
       <FormField
-        label={CREATE_PROPERTY_STRINGS.location}
+        label={PROPERTY_FORM_STRINGS.location}
         error={
-          hasLocationError ? CREATE_PROPERTY_STRINGS.locationRequired : undefined
+          hasLocationError ? PROPERTY_FORM_STRINGS.locationRequired : undefined
         }
       >
         <LocationPicker value={locationValue} onChange={handleLocationChange} />
       </FormField>
 
       <FormField
-        label={CREATE_PROPERTY_STRINGS.photos}
+        label={PROPERTY_FORM_STRINGS.photos}
         error={errors.photos?.message}
       >
         <Controller
@@ -327,17 +325,17 @@ export function CreatePropertyForm() {
       {emailVerificationFailed ? (
         <div className="flex flex-col gap-1">
           <Button type="submit" disabled>
-            {CREATE_PROPERTY_STRINGS.submit}
+            {PROPERTY_FORM_STRINGS.submit}
           </Button>
           <p className="text-xs text-muted-foreground">
-            {CREATE_PROPERTY_STRINGS.verifyEmailRequired}
+            {PROPERTY_FORM_STRINGS.verifyEmailRequired}
           </p>
         </div>
       ) : (
         <Button type="submit" disabled={isSubmitting}>
           {isSubmitting
-            ? CREATE_PROPERTY_STRINGS.submitting
-            : CREATE_PROPERTY_STRINGS.submit}
+            ? PROPERTY_FORM_STRINGS.submitting
+            : PROPERTY_FORM_STRINGS.submit}
         </Button>
       )}
     </form>

@@ -1,4 +1,4 @@
-export const CREATE_PROPERTY_STRINGS = {
+export const PROPERTY_FORM_STRINGS = {
   dealType: "Тип угоди",
   category: "Категорія",
   title: "Заголовок",

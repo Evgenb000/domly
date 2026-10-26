@@ -4,13 +4,13 @@ import type { UseFormRegister } from "react-hook-form";
 import type { PropertyDealType } from "@/entities/property";
 import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";
-import { CREATE_PROPERTY_STRINGS } from "../model/strings";
-import type { CreatePropertyFormValues } from "../model/defaults";
+import { PROPERTY_FORM_STRINGS } from "../model/strings";
+import type { PropertyFormValues } from "@/entities/property";
 
 interface PriceFieldsProps {
   dealType: PropertyDealType;
   hasDeposit: boolean;
-  register: UseFormRegister<CreatePropertyFormValues>;
+  register: UseFormRegister<PropertyFormValues>;
   priceError?: string;
   pricePerNightError?: string;
   minStayNightsError?: string;
@@ -33,7 +33,7 @@ export function PriceFields({
       <>
         <div className="flex flex-col gap-2">
           <Label htmlFor="pricePerNight">
-            {CREATE_PROPERTY_STRINGS.pricePerNight}
+            {PROPERTY_FORM_STRINGS.pricePerNight}
           </Label>
           <Input
             id="pricePerNight"
@@ -50,7 +50,7 @@ export function PriceFields({
 
         <div className="flex flex-col gap-2">
           <Label htmlFor="minStayNights">
-            {CREATE_PROPERTY_STRINGS.minStayNights}
+            {PROPERTY_FORM_STRINGS.minStayNights}
           </Label>
           <Input
             id="minStayNights"
@@ -71,7 +71,7 @@ export function PriceFields({
   return (
     <>
       <div className="flex flex-col gap-2">
-        <Label htmlFor="price">{CREATE_PROPERTY_STRINGS.price}</Label>
+        <Label htmlFor="price">{PROPERTY_FORM_STRINGS.price}</Label>
         <Input
           id="price"
           type="number"
@@ -96,7 +96,7 @@ export function PriceFields({
               className="size-4 accent-primary"
               aria-invalid={Boolean(hasDepositError)}
             />
-            <Label htmlFor="hasDeposit">{CREATE_PROPERTY_STRINGS.hasDeposit}</Label>
+            <Label htmlFor="hasDeposit">{PROPERTY_FORM_STRINGS.hasDeposit}</Label>
           </div>
           {hasDepositError ? (
             <p className="text-xs text-destructive">{hasDepositError}</p>
