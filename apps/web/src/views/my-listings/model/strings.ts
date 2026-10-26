@@ -7,6 +7,7 @@ export const MY_LISTINGS_VIEW_STRINGS = {
   loadMore: "Показати ще",
   loadMoreLoading: "Завантаження...",
   loadMoreError: "Не вдалося завантажити ще. Спробуйте ще раз.",
+  edit: "Редагувати",
   rejectedNote: "Не відображається в загальному списку",
   viewsFormat: (count: number) => `Переглядів: ${count}`,
 };
